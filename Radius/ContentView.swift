@@ -7,10 +7,12 @@
 
 import SwiftUI
 import SwiftData
+import FirebaseAuth
 
 
 
 struct ContentView: View {
+    @State private var userLoggedIn = (Auth.auth().currentUser != nil)
     
     
     @Environment(\.modelContext) private var modelContext
@@ -49,6 +51,16 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gear")
                 }.tag(2)
         }
+        .onAppear{
+            //Firebase state change listeneer
+            Auth.auth().addStateDidChangeListener{ auth, user in
+                if (user != nil) {
+                    userLoggedIn = true
+                } else {
+                    userLoggedIn = false
+                }
+            }
+        }
     }
     
     var mapView: some View {
@@ -69,21 +81,24 @@ struct ContentView: View {
     }
     var settingsView: some View {
         NavigationStack {
+            VStack {
             List {
                 NavigationLink(value: "homebase") {
                     Text("Set home base")
                 }
-                NavigationLink(value: "signin") {
-                    Text("Sign in")
-                }
                 NavigationLink(value: "legalinfo") {
                     Text("Legal info")
                 }
+                
+                SignInView()
+                    .padding(10)
             }
             .navigationTitle("Settings")
             .navigationDestination(for: String.self) { link in
                 
             }
+            
+        }
         }
     }
     
@@ -176,6 +191,52 @@ struct ContentView: View {
             .frame(minHeight: 60)
             .padding(0)
     }
+    
+    @ViewBuilder
+    func SignInView() -> some View {
+        VStack(alignment: .center) {
+        if userLoggedIn {
+            let email = Auth.auth().currentUser!.email
+            
+                Button {
+                    Task {
+                        do {
+                            try await Authentication().logout()
+                        } catch let e {
+                            print(e)
+                        }
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "person.badge.key.fill")
+                        Text("Sign out")
+                    }.padding(8)
+                }.buttonStyle(.borderedProminent)
+                Text(email ?? "")
+            }
+            else {
+                Button{
+                    Task {
+                        do {
+                            try await Authentication().googleOauth()
+                        } catch let e {
+                            print(e)
+                        }
+                    }
+                }label: {
+                    HStack(alignment: .center) {
+                        Image(systemName: "person.badge.key.fill")
+                        Text("Sign in with Google")
+                    }.padding(8)
+                }.buttonStyle(.borderedProminent)
+            }
+            
+        }
+        .frame(maxWidth: .infinity)
+            
+        
+    }
+    
 }
 
 #Preview {

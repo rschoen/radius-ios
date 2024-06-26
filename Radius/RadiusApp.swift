@@ -8,6 +8,9 @@
 import SwiftUI
 import SwiftData
 import GoogleMaps
+import FirebaseCore
+import FirebaseAuth
+import GoogleSignIn
 
 @main
 struct RadiusApp: App {
@@ -31,6 +34,10 @@ struct RadiusApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onOpenURL { url in
+                    //Handle Google Oauth URL
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
         .modelContainer(sharedModelContainer)
     }
@@ -38,11 +45,19 @@ struct RadiusApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        
         let filePath = Bundle.main.path(forResource: "Keys", ofType: "plist")!
         let plist = NSDictionary(contentsOfFile: filePath)
         let value = plist?.object(forKey: "Google Maps API key")
-        print(value as! String)
         GMSServices.provideAPIKey(value as! String)
+        
+        FirebaseApp.configure()
+        
         return true
+    }
+    func application(_ app: UIApplication,
+                     open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+      return GIDSignIn.sharedInstance.handle(url)
     }
 }
