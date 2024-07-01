@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-class Venue: Identifiable {
+class Venue: Identifiable, CustomStringConvertible {
     
     init(name: String, id: String, rating: Double, reviews: Int, imageUrl: URL?) {
         self.name = name
@@ -19,15 +19,19 @@ class Venue: Identifiable {
         self.imageUrl = imageUrl
     }
     
-    let name: String
+    var name: String
     let id: String
-    let rating: Double
-    let reviews: Int
-    let lat: Double = 0.0
-    let lng: Double = 0.0
-    let imageUrl: URL?
+    var rating: Double
+    var reviews: Int
+    var lat: Double = 0.0
+    var lng: Double = 0.0
+    var imageUrl: URL?
     
     var visited: Bool = false
-    let hidden: Bool = false
-    let active: Bool = true
+    var hidden: Bool = false
+    var active: Bool = true
+    
+    var description: String {
+        return "Venue (id: \(id), name: \(name), rating: \(rating), reviews: \(reviews), imageUrl: \(imageUrl?.absoluteString ?? "nil")"
+    }
 }

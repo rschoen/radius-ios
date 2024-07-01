@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7359AA6C2C2E045600FB21EF /* YelpService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7359AA6B2C2E045600FB21EF /* YelpService.swift */; };
 		735C44222C24C3D700D217D8 /* RadiusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C44212C24C3D700D217D8 /* RadiusApp.swift */; };
 		735C44242C24C3D700D217D8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C44232C24C3D700D217D8 /* ContentView.swift */; };
 		735C44282C24C3D800D217D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 735C44272C24C3D800D217D8 /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7359AA6B2C2E045600FB21EF /* YelpService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YelpService.swift; sourceTree = "<group>"; };
 		735C441E2C24C3D700D217D8 /* Radius.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radius.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		735C44212C24C3D700D217D8 /* RadiusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadiusApp.swift; sourceTree = "<group>"; };
 		735C44232C24C3D700D217D8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */,
+				7359AA6B2C2E045600FB21EF /* YelpService.swift */,
 				73ED2B942C2CB80D00B8B693 /* Info.plist */,
 				73ED2B8B2C2CB64500B8B693 /* GoogleService-Info.plist */,
 				735C44582C2A43E200D217D8 /* User.swift */,
@@ -201,6 +204,7 @@
 				735C44222C24C3D700D217D8 /* RadiusApp.swift in Sources */,
 				735C44342C2A0D4700D217D8 /* Extensions.swift in Sources */,
 				735C44592C2A43E200D217D8 /* User.swift in Sources */,
+				7359AA6C2C2E045600FB21EF /* YelpService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,6 +356,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ryanschoen.Radius;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -383,6 +388,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ryanschoen.Radius;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

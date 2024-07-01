@@ -10,14 +10,16 @@ import SwiftData
 import FirebaseAuth
 
 
-
+@MainActor
 struct ContentView: View {
     @State private var userLoggedIn = (Auth.auth().currentUser != nil)
+    @State private var networkVenues = [NetworkVenue]()
     
     
     @Environment(\.modelContext) private var modelContext
-    //@Query private var venues: [Venue]
+    @Query private var venues: [Venue]
     @Query private var users: [User]
+    @State var refreshCount = 0
     
     private var user: User {
         if let user = users.first {
@@ -30,9 +32,9 @@ struct ContentView: View {
     }
     
     
-    @State var venues = [Venue(name: "Toronado", id: "1", rating: 4.0, reviews: 10, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/h5j73EvBgbMVB5kFsH8rJg/l.jpg")),
+    /*@State var venues = [Venue(name: "Toronado", id: "1", rating: 4.0, reviews: 10, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/h5j73EvBgbMVB5kFsH8rJg/l.jpg")),
                          Venue(name: "L'Ardoise Bistro", id: "2", rating: 4.5, reviews: 26, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/75romlfKPuE_g8Gn1_gcMg/l.jpg")),
-                         Venue(name: "Hi Tops", id: "3", rating: 3.5, reviews: 6, imageUrl: nil),]
+                         Venue(name: "Hi Tops", id: "3", rating: 3.5, reviews: 6, imageUrl: nil),]*/
     
     @State var tabViewSelection: Int = 1
     var body: some View {
@@ -60,6 +62,12 @@ struct ContentView: View {
                     userLoggedIn = false
                 }
             }
+            
+            Task {
+                if networkVenues.isEmpty {
+                    await updateVenues()
+                }
+            }
         }
     }
     
@@ -73,12 +81,15 @@ struct ContentView: View {
     var venueListView: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(venues.indices) { index in
-                    VenueListItem(venues[index], index: index)
-                }
+                ForEach(venues) { venue in
+                    @Bindable var venue = venue
+                    VenueListItem(venue, visited: $venue.visited)
+                }.id("refresh-\(refreshCount)")
             }
         }
     }
+    
+    @MainActor
     var settingsView: some View {
         NavigationStack {
             VStack {
@@ -102,14 +113,14 @@ struct ContentView: View {
         }
     }
     
-    func VenueListItem(_ venue: Venue, index: Int) -> some View {
+    func VenueListItem(_ venue: Venue, visited: Binding<Bool>) -> some View {
         return ZStack(alignment: .leading) {
             venueBoundingBox
             HStack {
                 VenueImage(withUrl: venue.imageUrl)
                 VenueDetails(venue)
                 Spacer()
-                Toggle(isOn: $venues[index].visited) {}
+                Toggle(isOn: visited) {}
                 .toggleStyle(iOSCheckboxToggleStyle())
             }
         }.padding(10)
@@ -174,7 +185,7 @@ struct ContentView: View {
         .clipped()
     }
     
-    func VenueDetails(_ venue: Venue) -> some View {
+    func VenueDetails(@Bindable _ venue: Venue) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(venue.name)
                 .fontWeight(.medium)
@@ -235,6 +246,36 @@ struct ContentView: View {
         .frame(maxWidth: .infinity)
             
         
+    }
+    
+    func updateVenues() async {
+        if let downloadedVenues: Post = await WebService().downloadData(fromURL: "https://api.yelp.com/v3/businesses/search?sort_by=distance&location=2178+15th+st+san+francisco+ca&term=restaurant&limit=50&offset=0") {
+            networkVenues = downloadedVenues.businesses
+            print(networkVenues)
+            for networkVenue in networkVenues {
+                var found = false
+                for venue in venues {
+                    if venue.id == networkVenue.id {
+                        print("updating a venue")
+                        found = true
+                        venue.name = networkVenue.name
+                        venue.imageUrl = URL(string: networkVenue.image_url)
+                        venue.reviews = networkVenue.review_count
+                        venue.rating = networkVenue.rating
+                        venue.lat = networkVenue.coordinates.latitude
+                        venue.lng = networkVenue.coordinates.longitude
+                        break
+                    }
+                }
+                if !found && networkVenue.review_count >= 5 {
+                    print("inserting a venue")
+                    let newVenue = Venue(name: networkVenue.name, id: networkVenue.id, rating: networkVenue.rating, reviews: networkVenue.review_count, imageUrl: URL(string: networkVenue.image_url))
+                    modelContext.insert(newVenue)
+                    try? modelContext.save()
+                    refreshCount += 1
+                }
+            }
+        }
     }
     
 }

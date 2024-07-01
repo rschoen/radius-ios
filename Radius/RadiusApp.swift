@@ -8,8 +8,10 @@
 import SwiftUI
 import SwiftData
 import GoogleMaps
+import Firebase
 import FirebaseCore
 import FirebaseAuth
+import FirebaseAnalytics
 import GoogleSignIn
 
 @main
@@ -46,10 +48,7 @@ struct RadiusApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
-        let filePath = Bundle.main.path(forResource: "Keys", ofType: "plist")!
-        let plist = NSDictionary(contentsOfFile: filePath)
-        let value = plist?.object(forKey: "Google Maps API key")
-        GMSServices.provideAPIKey(value as! String)
+        GMSServices.provideAPIKey(getSecret(withKey: "GOOGLE_MAPS_API_KEY"))
         
         FirebaseApp.configure()
         
@@ -61,3 +60,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
       return GIDSignIn.sharedInstance.handle(url)
     }
 }
+
+func getSecret(withKey key: String) -> String {
+    let filePath = Bundle.main.path(forResource: "Keys", ofType: "plist")!
+    let plist = NSDictionary(contentsOfFile: filePath)
+    if let value = plist?.object(forKey: key) {
+        return value as? String ?? ""
+    }
+    return ""
+}
+
