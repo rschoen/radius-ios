@@ -8,16 +8,20 @@
 import SwiftUI
 
 struct VenueListTabView: View {
-    let venues: Array<Venue>
+    var venues: Array<Venue>
     let refreshCount: Int
     
+    
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(venues) { venue in
-                    @Bindable var venue = venue
-                    VenueListItem(venue, visited: $venue.visited)
-                }.id("refresh-\(refreshCount)")
+        VStack {
+            filterCheckboxes
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(venues) { venue in
+                        @Bindable var venue = venue
+                        VenueListItem(venue, visited: $venue.visited)
+                    }.id("refresh-\(refreshCount)")
+                }
             }
         }
     }
@@ -34,6 +38,26 @@ struct VenueListTabView: View {
             }
         }.padding(10)
             
+    }
+    
+    var filterCheckboxes: some View {
+        @State var isOn = true
+        @State var isOff = false
+        
+        return HStack(alignment: .center) {
+            LabeledCheckbox(label: "Visited", isOn: $isOn)
+            LabeledCheckbox(label: "Unvisited", isOn: $isOn)
+            LabeledCheckbox(label: "Hidden", isOn: $isOff)
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    func LabeledCheckbox(label: String, isOn: Binding<Bool>) -> some View {
+        HStack {
+            Toggle(isOn: isOn) {} .toggleStyle(iOSCheckboxToggleStyle())
+            Text(label)
+            
+        }.padding(10)
     }
     
     
@@ -113,4 +137,12 @@ struct VenueListTabView: View {
             .frame(minHeight: 60)
             .padding(0)
     }
+}
+
+#Preview {
+    let venues = [Venue(name: "Toronado", id: "1", rating: 4.0, reviews: 10, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/h5j73EvBgbMVB5kFsH8rJg/l.jpg")),
+                  Venue(name: "L'Ardoise Bistro", id: "2", rating: 4.5, reviews: 26, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/75romlfKPuE_g8Gn1_gcMg/l.jpg")),
+                  Venue(name: "Hi Tops", id: "3", rating: 3.5, reviews: 6, imageUrl: nil),]
+    
+    return VenueListTabView(venues: venues, refreshCount: 0)
 }
