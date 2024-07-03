@@ -22,6 +22,9 @@
 		7380D7312C35CAC800D715B9 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7380D7302C35CAC800D715B9 /* FirebaseFirestore */; };
 		7380D7332C35CAC800D715B9 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7380D7322C35CAC800D715B9 /* FirebaseFirestoreSwift */; };
 		7380D7352C35CBC000D715B9 /* FirebaseFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */; };
+		7380D73C2C35FF7E00D715B9 /* VenueListTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7380D73B2C35FF7E00D715B9 /* VenueListTabView.swift */; };
+		7380D73E2C35FFC900D715B9 /* GoogleMapsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7380D73D2C35FFC900D715B9 /* GoogleMapsTabView.swift */; };
+		7380D7402C36007800D715B9 /* SettingsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7380D73F2C36007800D715B9 /* SettingsTabView.swift */; };
 		73ED2B862C2CB49800B8B693 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 73ED2B852C2CB49800B8B693 /* FirebaseAuth */; };
 		73ED2B882C2CB49800B8B693 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 73ED2B872C2CB49800B8B693 /* FirebaseDatabase */; };
 		73ED2B8A2C2CB49800B8B693 /* FirebaseDatabaseSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 73ED2B892C2CB49800B8B693 /* FirebaseDatabaseSwift */; };
@@ -43,9 +46,12 @@
 		735C44332C2A0D4700D217D8 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		735C44382C2A181400D217D8 /* GoogleMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMap.swift; sourceTree = "<group>"; };
 		735C443A2C2A18E500D217D8 /* GoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapView.swift; sourceTree = "<group>"; };
-		735C44582C2A43E200D217D8 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = SOURCE_ROOT; };
+		735C44582C2A43E200D217D8 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = User.swift; path = Radius/Model/User.swift; sourceTree = SOURCE_ROOT; };
 		735C445A2C2A48B900D217D8 /* Keys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Keys.plist; sourceTree = "<group>"; };
 		7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseFirestore.swift; sourceTree = "<group>"; };
+		7380D73B2C35FF7E00D715B9 /* VenueListTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueListTabView.swift; sourceTree = "<group>"; };
+		7380D73D2C35FFC900D715B9 /* GoogleMapsTabView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleMapsTabView.swift; sourceTree = "<group>"; };
+		7380D73F2C36007800D715B9 /* SettingsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTabView.swift; sourceTree = "<group>"; };
 		73ED2B8B2C2CB64500B8B693 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		73ED2B942C2CB80D00B8B693 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignIn.swift; sourceTree = "<group>"; };
@@ -90,19 +96,15 @@
 		735C44202C24C3D700D217D8 /* Radius */ = {
 			isa = PBXGroup;
 			children = (
-				7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */,
-				73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */,
-				7359AA6B2C2E045600FB21EF /* YelpService.swift */,
+				7380D7382C35FF4A00D715B9 /* Tabs */,
+				7380D7372C35FF1A00D715B9 /* Services */,
+				7380D7362C35FF0900D715B9 /* Model */,
 				73ED2B942C2CB80D00B8B693 /* Info.plist */,
 				73ED2B8B2C2CB64500B8B693 /* GoogleService-Info.plist */,
-				735C44582C2A43E200D217D8 /* User.swift */,
 				735C44212C24C3D700D217D8 /* RadiusApp.swift */,
 				735C445A2C2A48B900D217D8 /* Keys.plist */,
-				735C44382C2A181400D217D8 /* GoogleMap.swift */,
 				735C44232C24C3D700D217D8 /* ContentView.swift */,
-				735C443A2C2A18E500D217D8 /* GoogleMapView.swift */,
 				735C44332C2A0D4700D217D8 /* Extensions.swift */,
-				735C44312C2A073000D217D8 /* Venue.swift */,
 				735C44272C24C3D800D217D8 /* Assets.xcassets */,
 				735C44292C24C3D800D217D8 /* Preview Content */,
 			);
@@ -115,6 +117,37 @@
 				735C442A2C24C3D800D217D8 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		7380D7362C35FF0900D715B9 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				735C44312C2A073000D217D8 /* Venue.swift */,
+				735C44582C2A43E200D217D8 /* User.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		7380D7372C35FF1A00D715B9 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				735C443A2C2A18E500D217D8 /* GoogleMapView.swift */,
+				7359AA6B2C2E045600FB21EF /* YelpService.swift */,
+				73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */,
+				7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */,
+				735C44382C2A181400D217D8 /* GoogleMap.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7380D7382C35FF4A00D715B9 /* Tabs */ = {
+			isa = PBXGroup;
+			children = (
+				7380D73D2C35FFC900D715B9 /* GoogleMapsTabView.swift */,
+				7380D73B2C35FF7E00D715B9 /* VenueListTabView.swift */,
+				7380D73F2C36007800D715B9 /* SettingsTabView.swift */,
+			);
+			path = Tabs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,8 +243,11 @@
 				73ED2B962C2CBB5000B8B693 /* GoogleSignIn.swift in Sources */,
 				735C44242C24C3D700D217D8 /* ContentView.swift in Sources */,
 				735C44322C2A073000D217D8 /* Venue.swift in Sources */,
+				7380D73C2C35FF7E00D715B9 /* VenueListTabView.swift in Sources */,
 				735C44222C24C3D700D217D8 /* RadiusApp.swift in Sources */,
 				7380D7352C35CBC000D715B9 /* FirebaseFirestore.swift in Sources */,
+				7380D73E2C35FFC900D715B9 /* GoogleMapsTabView.swift in Sources */,
+				7380D7402C36007800D715B9 /* SettingsTabView.swift in Sources */,
 				735C44342C2A0D4700D217D8 /* Extensions.swift in Sources */,
 				735C44592C2A43E200D217D8 /* User.swift in Sources */,
 				7359AA6C2C2E045600FB21EF /* YelpService.swift in Sources */,
