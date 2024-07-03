@@ -19,6 +19,9 @@
 		735C443B2C2A18E500D217D8 /* GoogleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C443A2C2A18E500D217D8 /* GoogleMapView.swift */; };
 		735C44592C2A43E200D217D8 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C44582C2A43E200D217D8 /* User.swift */; };
 		735C445B2C2A48B900D217D8 /* Keys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 735C445A2C2A48B900D217D8 /* Keys.plist */; };
+		7380D7312C35CAC800D715B9 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7380D7302C35CAC800D715B9 /* FirebaseFirestore */; };
+		7380D7332C35CAC800D715B9 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7380D7322C35CAC800D715B9 /* FirebaseFirestoreSwift */; };
+		7380D7352C35CBC000D715B9 /* FirebaseFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */; };
 		73ED2B862C2CB49800B8B693 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 73ED2B852C2CB49800B8B693 /* FirebaseAuth */; };
 		73ED2B882C2CB49800B8B693 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 73ED2B872C2CB49800B8B693 /* FirebaseDatabase */; };
 		73ED2B8A2C2CB49800B8B693 /* FirebaseDatabaseSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 73ED2B892C2CB49800B8B693 /* FirebaseDatabaseSwift */; };
@@ -42,6 +45,7 @@
 		735C443A2C2A18E500D217D8 /* GoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapView.swift; sourceTree = "<group>"; };
 		735C44582C2A43E200D217D8 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = SOURCE_ROOT; };
 		735C445A2C2A48B900D217D8 /* Keys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Keys.plist; sourceTree = "<group>"; };
+		7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseFirestore.swift; sourceTree = "<group>"; };
 		73ED2B8B2C2CB64500B8B693 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		73ED2B942C2CB80D00B8B693 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignIn.swift; sourceTree = "<group>"; };
@@ -57,8 +61,10 @@
 				73ED2B932C2CB71D00B8B693 /* GoogleSignInSwift in Frameworks */,
 				73ED2B882C2CB49800B8B693 /* FirebaseDatabase in Frameworks */,
 				735C44372C2A175100D217D8 /* GoogleMaps in Frameworks */,
+				7380D7312C35CAC800D715B9 /* FirebaseFirestore in Frameworks */,
 				73ED2B862C2CB49800B8B693 /* FirebaseAuth in Frameworks */,
 				73ED2B912C2CB71D00B8B693 /* GoogleSignIn in Frameworks */,
+				7380D7332C35CAC800D715B9 /* FirebaseFirestoreSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +90,7 @@
 		735C44202C24C3D700D217D8 /* Radius */ = {
 			isa = PBXGroup;
 			children = (
+				7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */,
 				73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */,
 				7359AA6B2C2E045600FB21EF /* YelpService.swift */,
 				73ED2B942C2CB80D00B8B693 /* Info.plist */,
@@ -134,6 +141,8 @@
 				73ED2B8D2C2CB67D00B8B693 /* FirebaseAnalyticsWithoutAdIdSupport */,
 				73ED2B902C2CB71D00B8B693 /* GoogleSignIn */,
 				73ED2B922C2CB71D00B8B693 /* GoogleSignInSwift */,
+				7380D7302C35CAC800D715B9 /* FirebaseFirestore */,
+				7380D7322C35CAC800D715B9 /* FirebaseFirestoreSwift */,
 			);
 			productName = Radius;
 			productReference = 735C441E2C24C3D700D217D8 /* Radius.app */;
@@ -202,6 +211,7 @@
 				735C44242C24C3D700D217D8 /* ContentView.swift in Sources */,
 				735C44322C2A073000D217D8 /* Venue.swift in Sources */,
 				735C44222C24C3D700D217D8 /* RadiusApp.swift in Sources */,
+				7380D7352C35CBC000D715B9 /* FirebaseFirestore.swift in Sources */,
 				735C44342C2A0D4700D217D8 /* Extensions.swift in Sources */,
 				735C44592C2A43E200D217D8 /* User.swift in Sources */,
 				7359AA6C2C2E045600FB21EF /* YelpService.swift in Sources */,
@@ -449,6 +459,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 735C44352C2A175100D217D8 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */;
 			productName = GoogleMaps;
+		};
+		7380D7302C35CAC800D715B9 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73ED2B842C2CB49800B8B693 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		7380D7322C35CAC800D715B9 /* FirebaseFirestoreSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73ED2B842C2CB49800B8B693 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestoreSwift;
 		};
 		73ED2B852C2CB49800B8B693 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

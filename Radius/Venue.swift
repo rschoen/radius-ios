@@ -31,6 +31,8 @@ class Venue: Identifiable, CustomStringConvertible {
     var hidden: Bool = false
     var active: Bool = true
     
+    var lastUpdated: Int = 0
+    
     var description: String {
         return "Venue (id: \(id), name: \(name), rating: \(rating), reviews: \(reviews), imageUrl: \(imageUrl?.absoluteString ?? "nil")"
     }

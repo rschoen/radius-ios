@@ -17,6 +17,7 @@ struct ContentView: View {
     
     
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var firestore: FirebaseFirestore
     @Query private var venues: [Venue]
     @Query private var users: [User]
     @State var refreshCount = 0
@@ -55,12 +56,20 @@ struct ContentView: View {
         }
         .onAppear{
             //Firebase state change listeneer
-            Auth.auth().addStateDidChangeListener{ auth, user in
-                if (user != nil) {
+            Auth.auth().addStateDidChangeListener{ auth, newUser in
+                if let newUser {
                     userLoggedIn = true
+                    user.email = newUser.email ?? ""
+                    user.firebaseId = newUser.uid
+                    
                 } else {
                     userLoggedIn = false
+                    user.email = ""
+                    user.firebaseId = ""
                 }
+                try? modelContext.save()
+                firestore.observeUserData(userId: user.firebaseId)
+                
             }
             
             Task {
@@ -251,12 +260,12 @@ struct ContentView: View {
     func updateVenues() async {
         if let downloadedVenues: Post = await WebService().downloadData(fromURL: "https://api.yelp.com/v3/businesses/search?sort_by=distance&location=2178+15th+st+san+francisco+ca&term=restaurant&limit=50&offset=0") {
             networkVenues = downloadedVenues.businesses
-            print(networkVenues)
+            //print(networkVenues)
             for networkVenue in networkVenues {
                 var found = false
                 for venue in venues {
                     if venue.id == networkVenue.id {
-                        print("updating a venue")
+                        //print("updating a venue")
                         found = true
                         venue.name = networkVenue.name
                         venue.imageUrl = URL(string: networkVenue.image_url)
@@ -268,7 +277,7 @@ struct ContentView: View {
                     }
                 }
                 if !found && networkVenue.review_count >= 5 {
-                    print("inserting a venue")
+                    //print("inserting a venue")
                     let newVenue = Venue(name: networkVenue.name, id: networkVenue.id, rating: networkVenue.rating, reviews: networkVenue.review_count, imageUrl: URL(string: networkVenue.image_url))
                     modelContext.insert(newVenue)
                     try? modelContext.save()

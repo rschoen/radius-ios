@@ -12,6 +12,7 @@ import Firebase
 import FirebaseCore
 import FirebaseAuth
 import FirebaseAnalytics
+import FirebaseFirestore
 import GoogleSignIn
 
 @main
@@ -32,6 +33,12 @@ struct RadiusApp: App {
         }
     }()
     
+    var firestore: FirebaseFirestore?
+    
+    init() {
+        firestore = FirebaseFirestore(modelContainer: sharedModelContainer)
+    }
+    
     
     var body: some Scene {
         WindowGroup {
@@ -42,6 +49,7 @@ struct RadiusApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
+        .environment(firestore)
     }
 }
 

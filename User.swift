@@ -14,9 +14,9 @@ class User {
         
     }
     
-    let email: String = ""
-    let firebaseId: String = ""
-    let address: String = ""
-    let lat: Double = 0.0
-    let lng: Double = 0.0
+    var email: String = ""
+    var firebaseId: String = ""
+    var address: String = ""
+    var lat: Double = 0.0
+    var lng: Double = 0.0
 }

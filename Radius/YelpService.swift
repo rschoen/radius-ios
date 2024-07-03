@@ -51,11 +51,11 @@ class WebService: Codable {
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue("Bearer \(getSecret(withKey: "YELP_API_KEY"))", forHTTPHeaderField: "Authorization")
-            print(request)
+            //print(request)
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
             guard response.statusCode >= 200 && response.statusCode < 300 else {
-                print(response)
+                //print(response)
                 throw NetworkError.badStatus
             }
             var decodedResponse: T? = nil
