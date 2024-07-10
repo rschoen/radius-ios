@@ -36,4 +36,9 @@ class Venue: Identifiable, CustomStringConvertible {
     var description: String {
         return "Venue (id: \(id), name: \(name), rating: \(rating), reviews: \(reviews), imageUrl: \(imageUrl?.absoluteString ?? "nil")"
     }
+    
+    func setLastUpdated() {
+        lastUpdated = Int(Date().timeIntervalSince1970)
+        print("Time last updated now \(lastUpdated)")
+    }
 }

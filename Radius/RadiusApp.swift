@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import GoogleMaps
+import GooglePlaces
 import Firebase
 import FirebaseCore
 import FirebaseAuth
@@ -56,7 +57,9 @@ struct RadiusApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
-        GMSServices.provideAPIKey(getSecret(withKey: "GOOGLE_MAPS_API_KEY"))
+        let googleKey = getSecret(withKey: "GOOGLE_MAPS_API_KEY")
+        GMSServices.provideAPIKey(googleKey)
+        GMSPlacesClient.provideAPIKey(googleKey)
         
         FirebaseApp.configure()
         

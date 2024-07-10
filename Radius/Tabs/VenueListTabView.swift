@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct VenueListTabView: View {
-    var venues: Array<Venue>
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.openURL) private var openURL
+    @EnvironmentObject var firestore: FirebaseFirestore
+    @Query private var venues: [Venue]
     let refreshCount: Int
     
     
@@ -19,22 +23,35 @@ struct VenueListTabView: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(venues) { venue in
                         @Bindable var venue = venue
-                        VenueListItem(venue, visited: $venue.visited)
+                        VenueListItem(venue)
                     }.id("refresh-\(refreshCount)")
                 }
             }
         }
     }
     
-    func VenueListItem(_ venue: Venue, visited: Binding<Bool>) -> some View {
+    func VenueListItem(_ venue: Venue) -> some View {
         return ZStack(alignment: .leading) {
             venueBoundingBox
             HStack {
-                VenueImage(withUrl: venue.imageUrl)
-                VenueDetails(venue)
-                Spacer()
-                Toggle(isOn: visited) {}
-                .toggleStyle(iOSCheckboxToggleStyle())
+                HStack {
+                    VenueImage(withUrl: venue.imageUrl)
+                    VenueDetails(venue)
+                    Spacer()
+                }
+                .onTapGesture {
+                    if let url = URL(string: "https://www.yelp.com/biz/\(venue.id)") {
+                        openURL(url)
+                    }
+                }
+                CheckboxButton(checked: venue.visited) {
+                    venue.visited.toggle()
+                    venue.setLastUpdated()
+                    Task {
+                        await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
+                    }
+                    try? modelContext.save()
+                }
             }
         }.padding(10)
             
@@ -45,9 +62,9 @@ struct VenueListTabView: View {
         @State var isOff = false
         
         return HStack(alignment: .center) {
-            LabeledCheckbox(label: "Visited", isOn: $isOn)
+            /*LabeledCheckbox(label: "Visited", isOn: $isOn)
             LabeledCheckbox(label: "Unvisited", isOn: $isOn)
-            LabeledCheckbox(label: "Hidden", isOn: $isOff)
+            LabeledCheckbox(label: "Hidden", isOn: $isOff)*/
         }
         .frame(maxWidth: .infinity)
     }
@@ -140,9 +157,5 @@ struct VenueListTabView: View {
 }
 
 #Preview {
-    let venues = [Venue(name: "Toronado", id: "1", rating: 4.0, reviews: 10, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/h5j73EvBgbMVB5kFsH8rJg/l.jpg")),
-                  Venue(name: "L'Ardoise Bistro", id: "2", rating: 4.5, reviews: 26, imageUrl: URL(string: "https://s3-media0.fl.yelpcdn.com/bphoto/75romlfKPuE_g8Gn1_gcMg/l.jpg")),
-                  Venue(name: "Hi Tops", id: "3", rating: 3.5, reviews: 6, imageUrl: nil),]
-    
-    return VenueListTabView(venues: venues, refreshCount: 0)
+    return VenueListTabView(refreshCount: 0)
 }

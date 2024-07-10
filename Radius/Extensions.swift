@@ -21,3 +21,15 @@ struct iOSCheckboxToggleStyle: ToggleStyle {
         })
     }
 }
+
+struct CheckboxButton: View {
+    var checked: Bool
+    var perform: () -> Void
+    
+    var body: some View {
+        Button(action: perform) {
+            Image(systemName: checked ? "checkmark.square" : "square")
+        }
+    }
+    
+}

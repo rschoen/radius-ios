@@ -42,8 +42,6 @@ enum NetworkError: Error {
     case failedToDecodeResponse
 }
 
-
-@MainActor
 class WebService: Codable {
     func downloadData<T: Codable>(fromURL: String) async -> T? {
         do {
@@ -52,7 +50,7 @@ class WebService: Codable {
             request.httpMethod = "GET"
             request.setValue("Bearer \(getSecret(withKey: "YELP_API_KEY"))", forHTTPHeaderField: "Authorization")
             //print(request)
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request, delegate: nil)
             guard let response = response as? HTTPURLResponse else { throw NetworkError.badResponse }
             guard response.statusCode >= 200 && response.statusCode < 300 else {
                 //print(response)

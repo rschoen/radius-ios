@@ -7,29 +7,70 @@
 
 import SwiftUI
 import FirebaseAuth
+import SwiftData
+import GoogleMaps
 
 struct SettingsTabView: View {
     let userLoggedIn: Bool
     
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var firestore: FirebaseFirestore
+    @State var isAddressPickerPresented: Bool = false
+    @Query private var users: [User]
+    
+    
+    private var user: User {
+        if let user = users.first {
+            return user
+        } else {
+            let user = User()
+            modelContext.insert(user)
+            return user
+        }
+    }
+    
     var body: some View {
+        
         NavigationStack {
             VStack {
                 List {
-                    NavigationLink(value: "homebase") {
-                        Text("Set home base")
-                    }
-                    NavigationLink(value: "legalinfo") {
-                        Text("Legal info")
+                    Section {
+                        Button {
+                            isAddressPickerPresented = true
+                        } label: {
+                            Text("Reset home base")
+                        }
+                        Button() {
+                            Task {
+                                await firestore.fullSync(userId: user.firebaseId)
+                            }
+                        } label: {
+                            Text("Trigger manual sync")
+                        }
+                        Button() {
+                            user.address = ""
+                            user.lat = 0.0
+                            user.lng = 0.0
+                        } label: {
+                            Text("Clear user address")
+                        }
+                        Link("Legal info", destination: URL(string: "https://ryanschoen.com/radius_ios_licenses.txt")!)
+                        
                     }
                     
                     SignInView()
                         .padding(10)
                 }
                 .navigationTitle("Settings")
-                .navigationDestination(for: String.self) { link in
-                    
-                }
                 
+            }
+        }.sheet(isPresented: $isAddressPickerPresented) {
+            VStack(alignment: .leading) {
+                Text("Reset home base")
+                    .font(.title)
+                    .padding(.leading, 30)
+                    .padding(.top, 30)
+                AddressPicker(isPresented: $isAddressPickerPresented)
             }
         }
     }

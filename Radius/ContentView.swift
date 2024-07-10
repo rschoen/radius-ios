@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import FirebaseAuth
+import GoogleMaps
 
 
 @MainActor
@@ -20,7 +21,6 @@ struct ContentView: View {
     @EnvironmentObject var firestore: FirebaseFirestore
     @Query private var venues: [Venue]
     @Query private var users: [User]
-    @State var refreshCount = 0
     
     private var user: User {
         if let user = users.first {
@@ -32,6 +32,8 @@ struct ContentView: View {
         }
     }
     
+    @State var refreshCount = 0
+    @State var showAddressPicker = false
 
     @State var tabViewSelection: Int = 1
     var body: some View {
@@ -41,7 +43,7 @@ struct ContentView: View {
                     Label("Map", systemImage: "map")
                 }.tag(0)
             
-            VenueListTabView(venues: venues, refreshCount: refreshCount)
+            VenueListTabView(refreshCount: refreshCount)
                 .tabItem {
                     Label("Venues", systemImage: "checklist")
                 }.tag(1)
@@ -49,6 +51,14 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }.tag(2)
+        }.sheet(isPresented: $showAddressPicker) {
+            VStack(alignment: .leading) {
+                Text("Welcome to Radius!")
+                    .font(.title)
+                    .padding(.leading, 30)
+                    .padding(.top, 30)
+                AddressPicker(isPresented: $showAddressPicker)
+            }
         }
         .onAppear{
             //Firebase state change listeneer
@@ -64,7 +74,9 @@ struct ContentView: View {
                     user.firebaseId = ""
                 }
                 try? modelContext.save()
-                firestore.observeUserData(userId: user.firebaseId)
+                Task {
+                    await firestore.fullSync(userId: user.firebaseId)
+                }
                 
             }
             
@@ -72,6 +84,10 @@ struct ContentView: View {
                 if networkVenues.isEmpty {
                     await updateVenues()
                 }
+            }
+            
+            if user.address.isEmpty {
+                showAddressPicker = true
             }
         }
     }
