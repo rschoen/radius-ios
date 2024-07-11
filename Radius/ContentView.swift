@@ -93,6 +93,8 @@ struct ContentView: View {
     }
     
     func updateVenues() async {
+        let homeCoords = CLLocation(latitude: user.lat, longitude: user.lng)
+        
         if let downloadedVenues: Post = await WebService().downloadData(fromURL: "https://api.yelp.com/v3/businesses/search?sort_by=distance&location=2178+15th+st+san+francisco+ca&term=restaurant&limit=50&offset=0") {
             networkVenues = downloadedVenues.businesses
             //print(networkVenues)
@@ -108,6 +110,10 @@ struct ContentView: View {
                         venue.rating = networkVenue.rating
                         venue.lat = networkVenue.coordinates.latitude
                         venue.lng = networkVenue.coordinates.longitude
+                        
+                        let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
+                        let metersFromHome = homeCoords.distance(from: coordinates)
+                        venue.milesFromHome = metersFromHome * 0.000621371
                         break
                     }
                 }

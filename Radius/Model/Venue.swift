@@ -26,6 +26,7 @@ class Venue: Identifiable, CustomStringConvertible {
     var lat: Double = 0.0
     var lng: Double = 0.0
     var imageUrl: URL?
+    var milesFromHome: Double = 0.0
     
     var visited: Bool = false
     var hidden: Bool = false

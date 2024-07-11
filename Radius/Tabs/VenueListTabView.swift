@@ -10,61 +10,33 @@ import SwiftData
 
 struct VenueListTabView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.openURL) private var openURL
-    @EnvironmentObject var firestore: FirebaseFirestore
+    
+    @State var showVisited = true
+    @State var showUnvisited = true
+    @State var showHidden = false
+    
     @Query private var venues: [Venue]
     let refreshCount: Int
-    
     
     var body: some View {
         VStack {
             filterCheckboxes
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(venues) { venue in
-                        @Bindable var venue = venue
-                        VenueListItem(venue)
-                    }.id("refresh-\(refreshCount)")
+                    VenuesList(showVisited: showVisited, showUnvisited: showUnvisited, showHidden: showHidden)
+                        .id("refresh-\(refreshCount)")
                 }
             }
         }
     }
     
-    func VenueListItem(_ venue: Venue) -> some View {
-        return ZStack(alignment: .leading) {
-            venueBoundingBox
-            HStack {
-                HStack {
-                    VenueImage(withUrl: venue.imageUrl)
-                    VenueDetails(venue)
-                    Spacer()
-                }
-                .onTapGesture {
-                    if let url = URL(string: "https://www.yelp.com/biz/\(venue.id)") {
-                        openURL(url)
-                    }
-                }
-                CheckboxButton(checked: venue.visited) {
-                    venue.visited.toggle()
-                    venue.setLastUpdated()
-                    Task {
-                        await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
-                    }
-                    try? modelContext.save()
-                }
-            }
-        }.padding(10)
-            
-    }
     
     var filterCheckboxes: some View {
-        @State var isOn = true
-        @State var isOff = false
-        
+
         return HStack(alignment: .center) {
-            /*LabeledCheckbox(label: "Visited", isOn: $isOn)
-            LabeledCheckbox(label: "Unvisited", isOn: $isOn)
-            LabeledCheckbox(label: "Hidden", isOn: $isOff)*/
+            LabeledCheckbox(label: "Visited", isOn: $showVisited)
+            LabeledCheckbox(label: "Unvisited", isOn: $showUnvisited)
+            LabeledCheckbox(label: "Hidden", isOn: $showHidden)
         }
         .frame(maxWidth: .infinity)
     }
@@ -78,6 +50,65 @@ struct VenueListTabView: View {
     }
     
     
+    
+    
+}
+
+struct VenuesList: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.openURL) private var openURL
+    @EnvironmentObject var firestore: FirebaseFirestore
+    @Query var venues: [Venue]
+    
+    init(showVisited: Bool, showUnvisited: Bool, showHidden: Bool) {
+        _venues = Query(filter: #Predicate<Venue> { (!$0.visited || showVisited) && ($0.visited || showUnvisited) && (!$0.hidden || showHidden) },
+                      sort: [SortDescriptor(\Venue.milesFromHome)])
+        
+    }
+    var body: some View {
+        ForEach(venues) { venue in
+            @Bindable var venue = venue
+            VenueListItem(venue)
+        }
+    }
+    
+    func VenueListItem(_ venue: Venue) -> some View {
+        return ZStack(alignment: .leading) {
+            venueBoundingBox
+            HStack {
+                HStack {
+                    VenueImage(withUrl: venue.imageUrl)
+                    VenueDetails(venue)
+                    Spacer()
+                }
+                .background(venue.hidden ? Color.init(hue: 0, saturation: 0, brightness: 0.95) : .white)
+                .onTapGesture {
+                    if let url = URL(string: "https://www.yelp.com/biz/\(venue.id)") {
+                        openURL(url)
+                    }
+                }
+                .onLongPressGesture {
+                    venue.hidden.toggle()
+                    venue.setLastUpdated()
+                    updateVenueInDatabase(venue)
+                }
+                CheckboxButton(checked: venue.visited) {
+                    venue.visited.toggle()
+                    venue.setLastUpdated()
+                    updateVenueInDatabase(venue)
+                }
+            }
+        }.padding(10)
+            .background(venue.hidden ? Color.init(hue: 0, saturation: 0, brightness: 0.95) : .white)
+            
+    }
+        
+        func updateVenueInDatabase(_ venue: Venue) {
+            Task {
+                await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
+            }
+            try? modelContext.save()
+        }
     
     func StarsImage(withRating rating: Double) -> some View {
         let intRating = round(rating * 2)
@@ -142,7 +173,7 @@ struct VenueListTabView: View {
             Text(venue.name)
                 .fontWeight(.medium)
             StarsAndReviews(rating: venue.rating, reviews: venue.reviews)
-            Text("0.05 mi away")
+            Text("\(String(format: "%.2f", venue.milesFromHome)) mi away")
                 .font(.system(size: 12.0))
                 .foregroundStyle(.gray)
         }
@@ -150,10 +181,11 @@ struct VenueListTabView: View {
     
     var venueBoundingBox: some View {
         Rectangle()
-            .fill(Color.white)
+            .fill(Color.clear)
             .frame(minHeight: 60)
             .padding(0)
     }
+    
 }
 
 #Preview {
