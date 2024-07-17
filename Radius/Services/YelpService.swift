@@ -27,8 +27,8 @@ struct NetworkVenue: Identifiable, Codable {
 }
 
 struct YelpCoordinates: Codable {
-    let latitude: Double
-    let longitude: Double
+    let latitude: Double?
+    let longitude: Double?
     private enum CodingKeys: String, CodingKey {
         case latitude, longitude
     }
@@ -43,8 +43,40 @@ enum NetworkError: Error {
 }
 
 class WebService: Codable {
+    
+    static let resultsPerQuery = 50
+    static let queries = 2
+    
+    func getVenuesAroundAddress(_ address: String) async -> [NetworkVenue]? {
+        guard !address.isEmpty else { return nil }
+        guard let urlSafeAddress = address.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return nil }
+        
+        let searchTerms = ["restuarant","bar"]
+        var venues: [NetworkVenue] = []
+        var addedVenues = Set<String>()
+        
+        for term in searchTerms {
+            let baseUrl = "https://api.yelp.com/v3/businesses/search?sort_by=distance&location=\(address.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)&term=\(term)&limit=\(WebService.resultsPerQuery)"
+            
+            for i in 0..<WebService.queries {
+                if let results: Post = await downloadData(fromURL: "\(baseUrl)&offset=\(String(i*WebService.resultsPerQuery))") {
+                    for venue in results.businesses {
+                        if !addedVenues.contains(venue.id) && venue.coordinates.latitude != nil && venue.coordinates.longitude != nil {
+                            venues.append(venue)
+                            addedVenues.insert(venue.id)
+                        }
+                    }
+                }
+            }
+        }
+        
+        return venues
+        
+    }
+    
     func downloadData<T: Codable>(fromURL: String) async -> T? {
         do {
+            //print(fromURL)
             guard let url = URL(string: fromURL) else { throw NetworkError.badUrl }
             var request = URLRequest(url: url)
             request.httpMethod = "GET"

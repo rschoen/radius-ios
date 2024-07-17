@@ -95,25 +95,30 @@ struct ContentView: View {
     func updateVenues() async {
         let homeCoords = CLLocation(latitude: user.lat, longitude: user.lng)
         
-        if let downloadedVenues: Post = await WebService().downloadData(fromURL: "https://api.yelp.com/v3/businesses/search?sort_by=distance&location=2178+15th+st+san+francisco+ca&term=restaurant&limit=50&offset=0") {
-            networkVenues = downloadedVenues.businesses
-            //print(networkVenues)
+        let networkVenues = await WebService().getVenuesAroundAddress(user.address)
+        venues.forEach { $0.active = false }
+        
+        if let networkVenues {
             for networkVenue in networkVenues {
                 var found = false
                 for venue in venues {
-                    if venue.id == networkVenue.id {
-                        //print("updating a venue")
-                        found = true
-                        venue.name = networkVenue.name
-                        venue.imageUrl = URL(string: networkVenue.image_url)
-                        venue.reviews = networkVenue.review_count
-                        venue.rating = networkVenue.rating
-                        venue.lat = networkVenue.coordinates.latitude
-                        venue.lng = networkVenue.coordinates.longitude
-                        
-                        let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
-                        let metersFromHome = homeCoords.distance(from: coordinates)
-                        venue.milesFromHome = metersFromHome * 0.000621371
+                    if venue.id == networkVenue.id  {
+                        if let lat = networkVenue.coordinates.latitude, let lng = networkVenue.coordinates.longitude {
+                            //print("updating a venue")
+                            found = true
+                            venue.name = networkVenue.name
+                            venue.imageUrl = URL(string: networkVenue.image_url)
+                            venue.reviews = networkVenue.review_count
+                            venue.rating = networkVenue.rating
+                            venue.lat = lat
+                            venue.lng = lng
+                            
+                            let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
+                            let metersFromHome = homeCoords.distance(from: coordinates)
+                            venue.milesFromHome = metersFromHome * 0.000621371
+                            
+                            venue.active = true
+                        }
                         break
                     }
                 }

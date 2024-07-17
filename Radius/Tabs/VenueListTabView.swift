@@ -27,7 +27,22 @@ struct VenueListTabView: View {
                         .id("refresh-\(refreshCount)")
                 }
             }
+            yelpAttributionText
         }
+    }
+    
+    var yelpAttributionText: some View {
+        HStack() {
+            Text("All venue data provided by")
+                .font(.system(size: 14))
+                .foregroundStyle(.gray)
+            Image("yelp_logo")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: 16)
+            Spacer()
+        }
+        .padding(10)
     }
     
     
@@ -61,7 +76,7 @@ struct VenuesList: View {
     @Query var venues: [Venue]
     
     init(showVisited: Bool, showUnvisited: Bool, showHidden: Bool) {
-        _venues = Query(filter: #Predicate<Venue> { (!$0.visited || showVisited) && ($0.visited || showUnvisited) && (!$0.hidden || showHidden) },
+        _venues = Query(filter: #Predicate<Venue> { $0.active && (!$0.visited || showVisited) && ($0.visited || showUnvisited) && (!$0.hidden || showHidden) },
                       sort: [SortDescriptor(\Venue.milesFromHome)])
         
     }
