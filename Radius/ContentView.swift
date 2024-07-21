@@ -93,10 +93,24 @@ struct ContentView: View {
     }
     
     func updateVenues() async {
+        if !user.lastYelpUpdate.timeIntervalSinceNow.isLess(than: -24 * 60 * 60) {
+            print("Yelp data not expired, no refresh needed")
+            return
+        }
+        
         let homeCoords = CLLocation(latitude: user.lat, longitude: user.lng)
         
         let networkVenues = await WebService().getVenuesAroundAddress(user.address)
-        venues.forEach { $0.active = false }
+        venues.forEach {
+            $0.active = false
+            $0.name = ""
+            $0.reviews = 0
+            $0.rating = 0
+            $0.lat = 0
+            $0.lng = 0
+            $0.milesFromHome = 0
+            $0.imageUrl = nil
+        }
         
         if let networkVenues {
             for networkVenue in networkVenues {
@@ -130,6 +144,7 @@ struct ContentView: View {
                     refreshCount += 1
                 }
             }
+            user.lastYelpUpdate = Date()
         }
     }
     
