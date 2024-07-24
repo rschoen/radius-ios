@@ -10,6 +10,7 @@ import SwiftData
 import FirebaseAuth
 import GoogleMaps
 
+let refreshSeconds: Double = 5//60 * 60 * 24
 
 @MainActor
 struct ContentView: View {
@@ -93,14 +94,14 @@ struct ContentView: View {
     }
     
     func updateVenues() async {
-        if !user.lastYelpUpdate.timeIntervalSinceNow.isLess(than: -24 * 60 * 60) {
-            print("Yelp data not expired, no refresh needed")
+        if !user.lastNetworkDataUpdate.timeIntervalSinceNow.isLess(than: -refreshSeconds) {
+            print("Network data not expired, no refresh needed")
             return
         }
         
         let homeCoords = CLLocation(latitude: user.lat, longitude: user.lng)
         
-        let networkVenues = await WebService().getVenuesAroundAddress(user.address)
+        let networkVenues = await WebService().getVenuesAroundLatLng(user.lat, user.lng)
         venues.forEach {
             $0.active = false
             $0.name = ""
@@ -112,40 +113,54 @@ struct ContentView: View {
             $0.imageUrl = nil
         }
         
-        if let networkVenues {
-            for networkVenue in networkVenues {
-                var found = false
-                for venue in venues {
-                    if venue.id == networkVenue.id  {
-                        if let lat = networkVenue.coordinates.latitude, let lng = networkVenue.coordinates.longitude {
-                            //print("updating a venue")
-                            found = true
-                            venue.name = networkVenue.name
-                            venue.imageUrl = URL(string: networkVenue.image_url)
-                            venue.reviews = networkVenue.review_count
-                            venue.rating = networkVenue.rating
-                            venue.lat = lat
-                            venue.lng = lng
-                            
-                            let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
-                            let metersFromHome = homeCoords.distance(from: coordinates)
-                            venue.milesFromHome = metersFromHome * 0.000621371
-                            
-                            venue.active = true
-                        }
-                        break
-                    }
-                }
-                if !found && networkVenue.review_count >= 5 {
-                    //print("inserting a venue")
-                    let newVenue = Venue(name: networkVenue.name, id: networkVenue.id, rating: networkVenue.rating, reviews: networkVenue.review_count, imageUrl: URL(string: networkVenue.image_url))
-                    modelContext.insert(newVenue)
-                    try? modelContext.save()
-                    refreshCount += 1
+        let apiKey = getSecret(withKey: "GOOGLE_MAPS_API_KEY")
+        
+        for networkVenue in networkVenues {
+            var found = false
+            for venue in venues {
+                if venue.id == networkVenue.id  {
+                    //if let lat = networkVenue.location.latitude, let lng = networkVenue.location.longitude {
+                        //print("updating a venue")
+                    found = true
+                    venue.name = networkVenue.name
+                    venue.imageUrl = photoUrlFromPhotosList(networkVenue.photos, apiKey: apiKey)
+                    venue.reviews = networkVenue.user_ratings_total ?? 0
+                    venue.rating = networkVenue.rating ?? 0
+                    venue.lat = networkVenue.geometry.location.lat
+                    venue.lng = networkVenue.geometry.location.lng
+                        
+                    let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
+                    let metersFromHome = homeCoords.distance(from: coordinates)
+                    venue.milesFromHome = metersFromHome * 0.000621371
+                    
+                    venue.active = true
+                    //}
+                    break
                 }
             }
-            user.lastYelpUpdate = Date()
+            if !found {
+                if let userRatings = networkVenue.user_ratings_total, let rating = networkVenue.rating {
+                    if userRatings > 5 {
+                        //print("inserting a venue")
+                       
+                        let newVenue = Venue(name: networkVenue.name, id: networkVenue.id, rating: rating, reviews: userRatings, lat: networkVenue.geometry.location.lat, lng: networkVenue.geometry.location.lng, imageUrl: photoUrlFromPhotosList(networkVenue.photos, apiKey: apiKey))
+                        modelContext.insert(newVenue)
+                        try? modelContext.save()
+                        refreshCount += 1
+                    }
+                }
+            }
+            user.lastNetworkDataUpdate = Date()
         }
+    }
+    
+    func photoUrlFromPhotosList(_ photosList: Array<GooglePhoto>?, apiKey: String) -> URL? {
+        var photoUrl: URL? = nil
+        if let photoRef = photosList?[0].photo_reference {
+            photoUrl = URL(string: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=\(photoRef)&key=\(apiKey)")
+        }
+        
+        return photoUrl
     }
     
 }

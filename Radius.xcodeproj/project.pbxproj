@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		73264F6C2C3EF40A00373C36 /* AddressPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73264F6B2C3EF40A00373C36 /* AddressPicker.swift */; };
-		7359AA6C2C2E045600FB21EF /* YelpService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7359AA6B2C2E045600FB21EF /* YelpService.swift */; };
+		7359AA6C2C2E045600FB21EF /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7359AA6B2C2E045600FB21EF /* NetworkService.swift */; };
 		735C44222C24C3D700D217D8 /* RadiusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C44212C24C3D700D217D8 /* RadiusApp.swift */; };
 		735C44242C24C3D700D217D8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C44232C24C3D700D217D8 /* ContentView.swift */; };
 		735C44282C24C3D800D217D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 735C44272C24C3D800D217D8 /* Assets.xcassets */; };
@@ -40,7 +40,7 @@
 
 /* Begin PBXFileReference section */
 		73264F6B2C3EF40A00373C36 /* AddressPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressPicker.swift; sourceTree = "<group>"; };
-		7359AA6B2C2E045600FB21EF /* YelpService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YelpService.swift; sourceTree = "<group>"; };
+		7359AA6B2C2E045600FB21EF /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		735C441E2C24C3D700D217D8 /* Radius.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radius.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		735C44212C24C3D700D217D8 /* RadiusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadiusApp.swift; sourceTree = "<group>"; };
 		735C44232C24C3D700D217D8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -139,7 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				735C443A2C2A18E500D217D8 /* GoogleMapView.swift */,
-				7359AA6B2C2E045600FB21EF /* YelpService.swift */,
+				7359AA6B2C2E045600FB21EF /* NetworkService.swift */,
 				73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */,
 				7380D7342C35CBC000D715B9 /* FirebaseFirestore.swift */,
 				735C44382C2A181400D217D8 /* GoogleMap.swift */,
@@ -262,7 +262,7 @@
 				7380D7402C36007800D715B9 /* SettingsTabView.swift in Sources */,
 				735C44342C2A0D4700D217D8 /* Extensions.swift in Sources */,
 				735C44592C2A43E200D217D8 /* User.swift in Sources */,
-				7359AA6C2C2E045600FB21EF /* YelpService.swift in Sources */,
+				7359AA6C2C2E045600FB21EF /* NetworkService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

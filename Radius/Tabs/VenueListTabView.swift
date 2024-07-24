@@ -27,23 +27,9 @@ struct VenueListTabView: View {
                         .id("refresh-\(refreshCount)")
                 }
             }
-            yelpAttributionText
         }
     }
     
-    var yelpAttributionText: some View {
-        HStack() {
-            Text("All venue data provided by")
-                .font(.system(size: 14))
-                .foregroundStyle(.gray)
-            Image("yelp_logo")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: 16)
-            Spacer()
-        }
-        .padding(10)
-    }
     
     
     var filterCheckboxes: some View {
@@ -98,7 +84,7 @@ struct VenuesList: View {
                 }
                 .background(venue.hidden ? Color.init(hue: 0, saturation: 0, brightness: 0.95) : .white)
                 .onTapGesture {
-                    if let url = URL(string: "https://www.yelp.com/biz/\(venue.id)") {
+                    if let url = URL(string: "https://www.google.com/maps/place/?q=place_id:\(venue.id)") {
                         openURL(url)
                     }
                 }
@@ -126,7 +112,7 @@ struct VenuesList: View {
         }
     
     func StarsImage(withRating rating: Double) -> some View {
-        let intRating = round(rating * 2)
+        let intRating = round(rating*rating / 5 * 2)
         let image = switch(intRating) {
         case 0:
             "stars_regular_0"

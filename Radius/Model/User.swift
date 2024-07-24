@@ -19,5 +19,5 @@ class User {
     var address: String = ""
     var lat: Double = 0.0
     var lng: Double = 0.0
-    var lastYelpUpdate: Date = Date(timeIntervalSince1970: 0)
+    var lastNetworkDataUpdate: Date = Date(timeIntervalSince1970: 0)
 }
