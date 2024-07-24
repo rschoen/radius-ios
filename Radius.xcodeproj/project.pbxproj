@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		731F19782C51AAEE004A5659 /* VenueLoadingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731F19772C51AAEE004A5659 /* VenueLoadingIndicator.swift */; };
 		73264F6C2C3EF40A00373C36 /* AddressPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73264F6B2C3EF40A00373C36 /* AddressPicker.swift */; };
 		7359AA6C2C2E045600FB21EF /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7359AA6B2C2E045600FB21EF /* NetworkService.swift */; };
 		735C44222C24C3D700D217D8 /* RadiusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C44212C24C3D700D217D8 /* RadiusApp.swift */; };
@@ -39,6 +40,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		731F19772C51AAEE004A5659 /* VenueLoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueLoadingIndicator.swift; sourceTree = "<group>"; };
 		73264F6B2C3EF40A00373C36 /* AddressPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressPicker.swift; sourceTree = "<group>"; };
 		7359AA6B2C2E045600FB21EF /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		735C441E2C24C3D700D217D8 /* Radius.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radius.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -153,6 +155,7 @@
 			children = (
 				7380D73D2C35FFC900D715B9 /* GoogleMapsTabView.swift */,
 				7380D73B2C35FF7E00D715B9 /* VenueListTabView.swift */,
+				731F19772C51AAEE004A5659 /* VenueLoadingIndicator.swift */,
 				7380D73F2C36007800D715B9 /* SettingsTabView.swift */,
 			);
 			path = Tabs;
@@ -252,6 +255,7 @@
 				735C44392C2A181400D217D8 /* GoogleMap.swift in Sources */,
 				73ED2B962C2CBB5000B8B693 /* GoogleSignIn.swift in Sources */,
 				735C44242C24C3D700D217D8 /* ContentView.swift in Sources */,
+				731F19782C51AAEE004A5659 /* VenueLoadingIndicator.swift in Sources */,
 				7380D7422C360FD800D715B9 /* GoogleAutocomplete.swift in Sources */,
 				735C44322C2A073000D217D8 /* Venue.swift in Sources */,
 				7380D73C2C35FF7E00D715B9 /* VenueListTabView.swift in Sources */,

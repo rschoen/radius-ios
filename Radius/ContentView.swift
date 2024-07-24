@@ -10,7 +10,7 @@ import SwiftData
 import FirebaseAuth
 import GoogleMaps
 
-let refreshSeconds: Double = 5//60 * 60 * 24
+let refreshSeconds: Double = 60 * 60 * 24
 
 @MainActor
 struct ContentView: View {
@@ -83,7 +83,9 @@ struct ContentView: View {
             
             Task {
                 if networkVenues.isEmpty {
-                    await updateVenues()
+                    if await updateVenues(forUser: user) {
+                        user.lastNetworkDataUpdate = Date()
+                    }
                 }
             }
             
@@ -91,12 +93,26 @@ struct ContentView: View {
                 showAddressPicker = true
             }
         }
+        .onChange(of: showAddressPicker, initial: true) { _, _ in
+            Task {
+                if networkVenues.isEmpty {
+                    if await updateVenues(forUser: user) {
+                        user.lastNetworkDataUpdate = Date()
+                    }
+                }
+            }
+        }
     }
     
-    func updateVenues() async {
+    func updateVenues(forUser user: User) async -> Bool {
         if !user.lastNetworkDataUpdate.timeIntervalSinceNow.isLess(than: -refreshSeconds) {
             print("Network data not expired, no refresh needed")
-            return
+            return false
+        }
+        
+        if user.address.isEmpty {
+            print("Address is empty")
+            return false
         }
         
         let homeCoords = CLLocation(latitude: user.lat, longitude: user.lng)
@@ -131,7 +147,7 @@ struct ContentView: View {
                         
                     let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
                     let metersFromHome = homeCoords.distance(from: coordinates)
-                    venue.milesFromHome = metersFromHome * 0.000621371
+                    venue.milesFromHome = homeCoords.distanceInMiles(fromLat: venue.lat, fromLong: venue.lng)
                     
                     venue.active = true
                     //}
@@ -142,22 +158,33 @@ struct ContentView: View {
                 if let userRatings = networkVenue.user_ratings_total, let rating = networkVenue.rating {
                     if userRatings > 5 {
                         //print("inserting a venue")
+                        
+                        let location = networkVenue.geometry.location
                        
-                        let newVenue = Venue(name: networkVenue.name, id: networkVenue.id, rating: rating, reviews: userRatings, lat: networkVenue.geometry.location.lat, lng: networkVenue.geometry.location.lng, imageUrl: photoUrlFromPhotosList(networkVenue.photos, apiKey: apiKey))
+                        let newVenue = Venue(
+                            name: networkVenue.name,
+                            id: networkVenue.id,
+                            rating: rating,
+                            reviews: userRatings,
+                            lat: location.lat,
+                            lng: location.lng,
+                            imageUrl: photoUrlFromPhotosList(networkVenue.photos, apiKey: apiKey),
+                            milesFromHome: homeCoords.distanceInMiles(fromLat: location.lat, fromLong: location.lng))
                         modelContext.insert(newVenue)
                         try? modelContext.save()
                         refreshCount += 1
                     }
                 }
             }
-            user.lastNetworkDataUpdate = Date()
+            
         }
+        return true
     }
     
     func photoUrlFromPhotosList(_ photosList: Array<GooglePhoto>?, apiKey: String) -> URL? {
         var photoUrl: URL? = nil
         if let photoRef = photosList?[0].photo_reference {
-            photoUrl = URL(string: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=\(photoRef)&key=\(apiKey)")
+            photoUrl = URL(string: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=70&photo_reference=\(photoRef)&key=\(apiKey)")
         }
         
         return photoUrl
@@ -168,4 +195,14 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: [Venue.self, User.self], inMemory: true)
+}
+
+
+
+extension CLLocation {
+    func distanceInMiles(fromLat: Double, fromLong: Double) -> Double {
+        let coordinates = CLLocation(latitude: fromLat, longitude: fromLong)
+        let distanceInMeters = self.distance(from: coordinates)
+        return distanceInMeters * 0.000621371
+    }
 }

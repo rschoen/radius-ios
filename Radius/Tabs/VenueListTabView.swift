@@ -20,13 +20,20 @@ struct VenueListTabView: View {
     
     var body: some View {
         VStack {
-            filterCheckboxes
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    VenuesList(showVisited: showVisited, showUnvisited: showUnvisited, showHidden: showHidden)
-                        .id("refresh-\(refreshCount)")
-                }
+            
+            if venues.isEmpty {
+                VenueLoadingIndicator()
+            } else {
+                    filterCheckboxes
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            VenuesList(showVisited: showVisited, showUnvisited: showUnvisited, showHidden: showHidden)
+                                .id("refresh-\(refreshCount)")
+                        }
+                        
+                    }
             }
+            Spacer(minLength: 15)
         }
     }
     
@@ -187,7 +194,11 @@ struct VenuesList: View {
             .padding(0)
     }
     
+    
+    
 }
+
+
 
 #Preview {
     return VenueListTabView(refreshCount: 0)

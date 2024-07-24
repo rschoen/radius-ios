@@ -11,7 +11,7 @@ import SwiftData
 @Model
 class Venue: Identifiable, CustomStringConvertible {
     
-    init(name: String, id: String, rating: Double, reviews: Int, lat: Double, lng: Double, imageUrl: URL?) {
+    init(name: String, id: String, rating: Double, reviews: Int, lat: Double, lng: Double, imageUrl: URL?, milesFromHome: Double) {
         self.name = name
         self.id = id
         self.rating = rating
@@ -19,6 +19,7 @@ class Venue: Identifiable, CustomStringConvertible {
         self.imageUrl = imageUrl
         self.lat = lat
         self.lng = lng
+        self.milesFromHome = milesFromHome
     }
     
     var name: String

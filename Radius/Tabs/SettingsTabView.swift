@@ -54,6 +54,11 @@ struct SettingsTabView: View {
                         } label: {
                             Text("Clear user address")
                         }
+                        Button() {
+                            try? modelContext.delete(model: Venue.self)
+                        } label: {
+                            Text("Clear venue data")
+                        }
                         Link("Legal info", destination: URL(string: "https://ryanschoen.com/radius_ios_licenses.txt")!)
                         
                     }

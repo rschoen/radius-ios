@@ -73,6 +73,7 @@ struct AddressPicker: View {
         user.address = address
         user.lat = latitude
         user.lng = longitude
+        try? modelContext.save()
         isPresented = false
         await firestore.storeAddress(address: address, latitude: latitude, longitude: longitude)
     }
