@@ -129,7 +129,7 @@ struct ContentView: View {
             $0.imageUrl = nil
         }
         
-        let apiKey = getSecret(withKey: "GOOGLE_MAPS_API_KEY")
+        let apiKey = getSecret(withKey: "GOOGLE_PLACES_API_KEY")
         
         for networkVenue in networkVenues {
             var found = false

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-@Model
+@Model 
 class User {
     init() {
         
@@ -20,4 +20,8 @@ class User {
     var lat: Double = 0.0
     var lng: Double = 0.0
     var lastNetworkDataUpdate: Date = Date(timeIntervalSince1970: 0)
+    
+    var showVisited = true
+    var showUnvisited = true
+    var showHidden = false
 }

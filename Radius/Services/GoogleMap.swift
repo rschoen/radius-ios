@@ -16,7 +16,7 @@
 import UIKit
 import GoogleMaps
 
-class GoogleMap: UIViewController {
+class GoogleMap: UIViewController, GMSMapViewDelegate {
     
     var map: GMSMapView?
 
@@ -27,13 +27,22 @@ class GoogleMap: UIViewController {
         // coordinate -33.86,151.20 at zoom level 6.
 
         let options = GMSMapViewOptions()
-        options.camera = GMSCameraPosition.camera(withLatitude: 37.7749, longitude: -122.4194, zoom: 11.0)
+        options.camera = GMSCameraPosition.camera(withLatitude: 37.774, longitude: -122.419, zoom: 7.0)
         options.frame = self.view.bounds
 
         map = GMSMapView(options: options)
+        map?.delegate = self
         self.view.addSubview(map!)
 
-  }
+    }
+    /*nonisolated func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+      if let title = marker.title {
+        if let snippet = marker.snippet {
+          print("marker title: \(title): snippet: \(snippet)")
+        }
+      }
+      return true
+    }*/
     
     
 }

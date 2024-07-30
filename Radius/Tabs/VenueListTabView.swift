@@ -11,11 +11,19 @@ import SwiftData
 struct VenueListTabView: View {
     @Environment(\.modelContext) private var modelContext
     
-    @State var showVisited = true
-    @State var showUnvisited = true
-    @State var showHidden = false
-    
     @Query private var venues: [Venue]
+    @Query private var users: [User]
+    
+    private var user: User {
+        if let user = users.first {
+            return user
+        } else {
+            let user = User()
+            modelContext.insert(user)
+            return user
+        }
+    }
+    
     let refreshCount: Int
     
     var body: some View {
@@ -27,7 +35,7 @@ struct VenueListTabView: View {
                     filterCheckboxes
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
-                            VenuesList(showVisited: showVisited, showUnvisited: showUnvisited, showHidden: showHidden)
+                            VenuesList(showVisited: user.showVisited, showUnvisited: user.showUnvisited, showHidden: user.showHidden)
                                 .id("refresh-\(refreshCount)")
                         }
                         
@@ -42,9 +50,10 @@ struct VenueListTabView: View {
     var filterCheckboxes: some View {
 
         return HStack(alignment: .center) {
-            LabeledCheckbox(label: "Visited", isOn: $showVisited)
-            LabeledCheckbox(label: "Unvisited", isOn: $showUnvisited)
-            LabeledCheckbox(label: "Hidden", isOn: $showHidden)
+            @Bindable var user = user
+            LabeledCheckbox(label: "Visited", isOn: $user.showVisited)
+            LabeledCheckbox(label: "Unvisited", isOn: $user.showUnvisited)
+            LabeledCheckbox(label: "Hidden", isOn: $user.showHidden)
         }
         .frame(maxWidth: .infinity)
     }
@@ -91,7 +100,7 @@ struct VenuesList: View {
                 }
                 .background(venue.hidden ? Color.init(hue: 0, saturation: 0, brightness: 0.95) : .white)
                 .onTapGesture {
-                    if let url = URL(string: "https://www.google.com/maps/place/?q=place_id:\(venue.id)") {
+                    if let url = URL(string: "https://www.google.com/maps/search/?api=1&query=123%20main%20st&query_place_id=\(venue.id)") {
                         openURL(url)
                     }
                 }
@@ -119,7 +128,7 @@ struct VenuesList: View {
         }
     
     func StarsImage(withRating rating: Double) -> some View {
-        let intRating = round(rating*rating / 5 * 2)
+        let intRating = round(convertGoogleMapsRatingToRadiusRating(rating) * 2)
         let image = switch(intRating) {
         case 0:
             "stars_regular_0"

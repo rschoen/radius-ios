@@ -14,16 +14,75 @@ struct GoogleMapView: UIViewControllerRepresentable {
     
     @Environment(\.modelContext) private var modelContext
     @Query private var venues: [Venue]
+    @Query private var users: [User]
+    
+    private var user: User {
+        if let user = users.first {
+            return user
+        } else {
+            let user = User()
+            modelContext.insert(user)
+            return user
+        }
+    }
     
     func makeUIViewController(context: Context) -> GoogleMap {
         return GoogleMap()
     }
     
     func updateUIViewController(_ uiViewController: GoogleMap, context: Context) {
-        for venue in venues {
-            let marker = createMarker(title: venue.name, description: "Description goes here", lat: venue.lat, lng: venue.lng)
-            marker.map = uiViewController.map
+        if user.address.isEmpty {
+            return
         }
+        if let map = uiViewController.map {
+            
+            Task.detached {
+                await map.clear()
+                
+                let homeLocation = CLLocation(latitude: user.lat, longitude: user.lng)
+                
+                var distances = Array<Double>()
+                
+                var maxVenueDistance = 0.0
+                var minUnvisitedDistance = Double.infinity
+                
+                for venue in venues {
+                    guard venue.hidden == false else { continue }
+                    
+                    let marker = createMarker(title: venue.name, description: "\(convertGoogleMapsRatingToRadiusRating(venue.rating)) stars, \(venue.reviews) reviews", lat: venue.lat, lng: venue.lng)
+                    if venue.visited {
+                        marker.icon = GMSMarker.markerImage(with: .green)
+                    }
+                    marker.map = map
+                    
+                    let distance = homeLocation.distance(from: CLLocation(latitude: venue.lat, longitude: venue.lng))
+                    
+                    if distance > maxVenueDistance {
+                        maxVenueDistance = distance
+                    }
+                    if !venue.visited && distance < minUnvisitedDistance {
+                        minUnvisitedDistance = distance
+                    }
+                    
+                    distances.append(distance)
+                }
+                
+                distances.sort()
+                let tenthDistance = distances[min(distances.count,9)]
+                
+                await map.moveCamera(GMSCameraUpdate.setCamera(GMSCameraPosition(latitude: user.lat, longitude: user.lng, zoom: distanceToZoom(tenthDistance))))
+                
+                let homeMarker = createMarker(title: "Home Base", description: user.address, lat: user.lat, lng: user.lng)
+                homeMarker.icon = GMSMarker.markerImage(with: .blue)
+                homeMarker.map = map
+                
+                
+                await map.drawCircle(position: homeLocation, radius: maxVenueDistance, color: UIColor.gray)
+                await map.drawCircle(position: homeLocation, radius: minUnvisitedDistance, color: UIColor.green)
+                await Task.yield()
+            }
+        }
+        
     }
     
     func createMarker(title: String, description: String, lat: Double, lng: Double) -> GMSMarker
@@ -40,4 +99,38 @@ struct GoogleMapView: UIViewControllerRepresentable {
 
 #Preview {
     GoogleMapView()
+}
+
+
+func distanceToZoom(_ distance: Double) -> Float {
+        return if (distance < 100) {
+            18.0
+        } else if (distance < 200) {
+            17.0
+        } else if (distance < 500) {
+            16.0
+        } else if (distance < 1000) {
+            15.0
+        } else if (distance < 2000) {
+            14.0
+        } else if (distance < 5000) {
+            13.0
+        } else if (distance < 10_000) {
+            12.0
+        } else if (distance < 20_000) {
+            11.0
+        } else {
+            10.0
+        }
+    }
+
+
+extension GMSMapView {
+    func drawCircle(position: CLLocation, radius: Double, color: UIColor) {
+        if radius > 0 {
+            let circle = GMSCircle(position: position.coordinate, radius: radius)
+            circle.strokeColor = color
+            circle.map = self
+        }
+    }
 }
