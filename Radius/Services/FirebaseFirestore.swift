@@ -126,11 +126,18 @@ extension FirebaseFirestore {
         addressNode.child("longitude").setValue(longitude)
     }
     
+    func deleteUser() -> Bool {
+        if userId.isEmpty { return false }
+        
+        getReference().child("users/\(userId)").removeValue()
+        return true
+    }
     
-    /*func subscribeToOnlyChanges() async -> DataSnapshot {
-        await withCheckedContinuation { continuation in
-            ref.child("users").child(userId).child("venues").observe(DataEventType.value) { snapshot in
-                continuation.resume(returning: snapshot)
+    
+    /*func subscribeToChanges() -> AsyncStream<DataSnapshot> {
+        AsyncStream { continuation in
+            getReference().child("users").child(userId).child("venues").observe(DataEventType.value) { snapshot in
+                continuation.yield(snapshot)
             }
         }
     }
@@ -138,21 +145,18 @@ extension FirebaseFirestore {
     func observeUserData(userId: String) async {
         self.userId = userId
         
-        if ref == nil {
-            ref = Database.database().reference()
-        }
-        
         if !userId.isEmpty {
-            let snapshot = await fetchVenuesSnapshot()
-            for venue in snapshot.children {
-                guard let snap = venue as? DataSnapshot else { return }
-                guard let value = snap.value as? [String: Any] else { return }
-                do {
-                    let jsonData = try JSONSerialization.data(withJSONObject: value, options: [])
-                    let decoded = try JSONDecoder().decode(DatabaseVenue.self, from: jsonData)
-                    await self.updateVenue(decoded)
-                } catch {
-                    print("ERROR HERE: \(error)")
+            for await snapshot in subscribeToChanges() {
+                for venue in snapshot.children {
+                    guard let snap = venue as? DataSnapshot else { return }
+                    guard let value = snap.value as? [String: Any] else { return }
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: value, options: [])
+                        let decoded = try JSONDecoder().decode(DatabaseVenue.self, from: jsonData)
+                        await self.updateVenue(decoded)
+                    } catch {
+                        print("ERROR HERE: \(error)")
+                    }
                 }
             }
         }
@@ -182,7 +186,7 @@ extension FirebaseFirestore {
     }
     
     func setVenueStatus(id: String, visited: Bool, hidden: Bool, lastUpdated: Int?) {
-        let venueNode = self.ref.child("users/\(userId)/venues/\(id)")
+        let venueNode = getReference().child("users/\(userId)/venues/\(id)")
         
         venueNode.child("visited").setValue(visited)
         venueNode.child("hidden").setValue(hidden)

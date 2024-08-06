@@ -49,11 +49,18 @@ struct GoogleMapView: UIViewControllerRepresentable {
                 for venue in venues {
                     guard venue.hidden == false else { continue }
                     
-                    let marker = createMarker(title: venue.name, description: "\(convertGoogleMapsRatingToRadiusRating(venue.rating)) stars, \(venue.reviews) reviews", lat: venue.lat, lng: venue.lng)
-                    if venue.visited {
-                        marker.icon = GMSMarker.markerImage(with: .green)
+                    let title = venue.name
+                    let description = "\(convertGoogleMapsRatingToRadiusRating(venue.rating)) stars, \(venue.reviews) reviews"
+                    let lat = venue.lat
+                    let lng = venue.lng
+                    let visited = venue.visited
+                    Task.detached { @MainActor in
+                        let marker = createMarker(title: title, description: description, lat: lat, lng: lng)
+                        if visited {
+                            marker.icon = GMSMarker.markerImage(with: .green)
+                        }
+                        marker.map = map
                     }
-                    marker.map = map
                     
                     let distance = homeLocation.distance(from: CLLocation(latitude: venue.lat, longitude: venue.lng))
                     
@@ -72,9 +79,12 @@ struct GoogleMapView: UIViewControllerRepresentable {
                 
                 await map.moveCamera(GMSCameraUpdate.setCamera(GMSCameraPosition(latitude: user.lat, longitude: user.lng, zoom: distanceToZoom(tenthDistance))))
                 
-                let homeMarker = createMarker(title: "Home Base", description: user.address, lat: user.lat, lng: user.lng)
-                homeMarker.icon = GMSMarker.markerImage(with: .blue)
-                homeMarker.map = map
+                
+                Task.detached { @MainActor in
+                    let homeMarker = createMarker(title: "Home Base", description: user.address, lat: user.lat, lng: user.lng)
+                    homeMarker.icon = GMSMarker.markerImage(with: .blue)
+                    homeMarker.map = map
+                }
                 
                 
                 await map.drawCircle(position: homeLocation, radius: maxVenueDistance, color: UIColor.gray)
@@ -87,6 +97,7 @@ struct GoogleMapView: UIViewControllerRepresentable {
     
     func createMarker(title: String, description: String, lat: Double, lng: Double) -> GMSMarker
     {
+        print(Thread.current)
         let marker = GMSMarker()
         marker.position = CLLocationCoordinate2D(latitude: lat, longitude: lng)
         marker.title = title

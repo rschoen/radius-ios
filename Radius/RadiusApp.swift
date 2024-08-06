@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 import GoogleMaps
 import GooglePlaces
-import Firebase
 import FirebaseCore
 import FirebaseAuth
 import FirebaseAnalytics
