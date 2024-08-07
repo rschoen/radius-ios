@@ -62,6 +62,7 @@
 		73ED2B8B2C2CB64500B8B693 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		73ED2B942C2CB80D00B8B693 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		73ED2B952C2CBB5000B8B693 /* GoogleSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignIn.swift; sourceTree = "<group>"; };
+		73FAE7B62C63FA4A001FA977 /* Radius.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Radius.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +105,7 @@
 		735C44202C24C3D700D217D8 /* Radius */ = {
 			isa = PBXGroup;
 			children = (
+				73FAE7B62C63FA4A001FA977 /* Radius.entitlements */,
 				73264F6B2C3EF40A00373C36 /* AddressPicker.swift */,
 				7380D7382C35FF4A00D715B9 /* Tabs */,
 				7380D7372C35FF1A00D715B9 /* Services */,
@@ -397,8 +399,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Radius/Radius.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"Radius/Preview Content\"";
 				DEVELOPMENT_TEAM = X5QW7R8SD5;
 				ENABLE_PREVIEWS = YES;
@@ -430,8 +433,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Radius/Radius.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"Radius/Preview Content\"";
 				DEVELOPMENT_TEAM = X5QW7R8SD5;
 				ENABLE_PREVIEWS = YES;

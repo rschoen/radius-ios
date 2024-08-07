@@ -75,7 +75,10 @@ struct GoogleMapView: UIViewControllerRepresentable {
                 }
                 
                 distances.sort()
-                let tenthDistance = distances[min(distances.count,9)]
+                var tenthDistance = 0.0
+                if !distances.isEmpty {
+                    tenthDistance = distances[min(distances.count,9)]
+                }
                 
                 await map.moveCamera(GMSCameraUpdate.setCamera(GMSCameraPosition(latitude: user.lat, longitude: user.lng, zoom: distanceToZoom(tenthDistance))))
                 
