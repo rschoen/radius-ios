@@ -52,7 +52,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }.tag(2)
-        }.sheet(isPresented: $showAddressPicker) {
+        }.fullScreenCover(isPresented: $showAddressPicker) {
             VStack(alignment: .leading) {
                 Text("Welcome to Radius!")
                     .font(.title)

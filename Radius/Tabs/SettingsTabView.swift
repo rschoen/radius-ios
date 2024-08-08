@@ -186,15 +186,8 @@ struct SettingsTabView: View {
                   print(error.localizedDescription)
                   return
                 }
-                print("SUCCESS")
+                
               }
-        
-        
-        print(appleCredential.user)
-    
-        if appleCredential.authorizedScopes.contains(.email) {
-            print(appleCredential.email ?? "No email found")
-        }
     }
     
     @ViewBuilder
