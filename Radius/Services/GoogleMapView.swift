@@ -100,7 +100,6 @@ struct GoogleMapView: UIViewControllerRepresentable {
     
     func createMarker(title: String, description: String, lat: Double, lng: Double) -> GMSMarker
     {
-        print(Thread.current)
         let marker = GMSMarker()
         marker.position = CLLocationCoordinate2D(latitude: lat, longitude: lng)
         marker.title = title

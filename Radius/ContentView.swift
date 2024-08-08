@@ -146,7 +146,6 @@ struct ContentView: View {
                     venue.lng = networkVenue.geometry.location.lng
                         
                     let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
-                    let metersFromHome = homeCoords.distance(from: coordinates)
                     venue.milesFromHome = homeCoords.distanceInMiles(fromLat: venue.lat, fromLong: venue.lng)
                     
                     venue.active = true

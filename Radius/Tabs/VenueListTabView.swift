@@ -83,10 +83,14 @@ struct VenuesList: View {
         
     }
     var body: some View {
-        ForEach(venues) { venue in
-            @Bindable var venue = venue
-            VenueListItem(venue)
+        VStack {
+            ForEach(venues, id: \.id) { venue in
+                @Bindable var venue = venue
+                VenueListItem(venue)
+                    .transition(.move(edge: .top))
+            }
         }
+        //.animation(Animation.easeInOut(duration: 0.2))
     }
     
     func VenueListItem(_ venue: Venue) -> some View {
@@ -105,14 +109,18 @@ struct VenuesList: View {
                     }
                 }
                 .onLongPressGesture {
-                    venue.hidden.toggle()
-                    venue.setLastUpdated()
-                    updateVenueInDatabase(venue)
+                    withAnimation(.easeIn(duration: 0.5)) {
+                        venue.hidden.toggle()
+                        venue.setLastUpdated()
+                        updateVenueInDatabase(venue)
+                    }
                 }
                 CheckboxButton(checked: venue.visited) {
-                    venue.visited.toggle()
-                    venue.setLastUpdated()
-                    updateVenueInDatabase(venue)
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        venue.visited.toggle()
+                        venue.setLastUpdated()
+                        updateVenueInDatabase(venue)
+                    }
                 }
             }
         }.padding(10)
