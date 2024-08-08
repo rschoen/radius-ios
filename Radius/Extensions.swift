@@ -30,7 +30,7 @@ struct CheckboxButton: View {
     var body: some View {
         Button(action: perform) {
             Image(systemName: checked ? "checkmark.square" : "square")
-                .padding(10)
+                .padding(15)
         }
     }
     
