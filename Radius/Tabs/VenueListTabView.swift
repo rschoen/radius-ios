@@ -25,6 +25,7 @@ struct VenueListTabView: View {
     }
     
     let refreshCount: Int
+    var callOnRefresh: () -> Void
     
     var body: some View {
         VStack {
@@ -39,6 +40,9 @@ struct VenueListTabView: View {
                                 .id("refresh-\(refreshCount)")
                         }
                         
+                    }
+                    .refreshable {
+                        callOnRefresh()
                     }
             }
             Spacer(minLength: 15)
@@ -83,13 +87,16 @@ struct VenuesList: View {
         
     }
     var body: some View {
-        VStack {
             ForEach(venues, id: \.id) { venue in
                 @Bindable var venue = venue
                 VenueListItem(venue)
+                    .onAppear {
+                        if (venues.last?.id == venue.id) {
+                            print("Asking for more venues")
+                        }
+                    }
                     .transition(.move(edge: .top))
             }
-        }
         //.animation(Animation.easeInOut(duration: 0.2))
     }
     
@@ -102,7 +109,7 @@ struct VenuesList: View {
                     VenueDetails(venue)
                     Spacer()
                 }
-                .background(venue.hidden ? Color.init(hue: 0, saturation: 0, brightness: 0.95) : .white)
+                .background(venue.hidden ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
                 .onTapGesture {
                     if let url = URL(string: "https://www.google.com/maps/search/?api=1&query=123%20main%20st&query_place_id=\(venue.id)") {
                         openURL(url)
@@ -124,7 +131,7 @@ struct VenuesList: View {
                 }
             }
         }.padding(10)
-            .background(venue.hidden ? Color.init(hue: 0, saturation: 0, brightness: 0.95) : .white)
+            .background(venue.hidden ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
             
     }
         
@@ -218,5 +225,5 @@ struct VenuesList: View {
 
 
 #Preview {
-    return VenueListTabView(refreshCount: 0)
+    return VenueListTabView(refreshCount: 0) {}
 }

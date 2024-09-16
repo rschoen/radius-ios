@@ -7,46 +7,27 @@
 
 import Foundation
 
-struct GoogleLocation: Codable {
-    let lat: Double
-    let lng: Double
+
+struct RadiusAPIResult: Codable {
+    let metadata: RadiusAPIMetadata
+    let venues: Array<NetworkVenue>
 }
 
-struct GooglePlacesResult: Codable {
-    let results: Array<NetworkVenue>
-    let next_page_token: String?
-    
-    private enum CodingKeys: String, CodingKey {
-        case results, next_page_token
-    }
+struct RadiusAPIMetadata: Codable {
+    let queryId: String
+    let resultsComplete: Bool
 }
 
 struct NetworkVenue: Identifiable, Codable {
-    var id: String { place_id }
-    let place_id: String
-    let business_status: String?
+    var id: String
     let name: String
-    let photos: Array<GooglePhoto>?
-    let user_ratings_total: Int?
+    let imageUrl: String?
+    let reviews: Int?
     let rating: Double?
-    let geometry: GoogleGeometry
+    let latitude: Double
+    let longitude: Double
     private enum CodingKeys: String, CodingKey {
-        case place_id, business_status, name, photos, user_ratings_total, rating, geometry
-    }
-}
-
-struct GooglePhoto: Codable {
-    let photo_reference: String
-    private enum CodingKeys: String, CodingKey {
-        case photo_reference
-    }
-}
-
-struct GoogleGeometry: Codable {
-    let location: GoogleLocation
-    
-    private enum CodingKeys: String, CodingKey {
-        case location
+        case id, name, imageUrl, reviews, rating, latitude, longitude
     }
 }
 
@@ -66,43 +47,20 @@ class WebService: Codable {
     
     func getVenuesAroundLatLng(_ lat: Double, _ lng: Double) async -> [NetworkVenue] {
         
-        let searchTerms = ["restaurant","bar"]
-        let apiKey = getSecret(withKey: "GOOGLE_PLACES_API_KEY")
+        let apiKey = getSecret(withKey: "RADIUS_API_KEY")
         var venues: [NetworkVenue] = []
         var addedVenues = Set<String>()
         
-        for term in searchTerms {
-            var pageToken = ""
-            
-            
-            for _ in 0..<WebService.queries {
-                let pageTokenParameter = !pageToken.isEmpty ? "&pagetoken=\(pageToken)" : ""
-                let url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" +
-                "&location=\(lat)%2C\(lng)" +
-                "&rankby=distance" +
-                "&type=\(term)" +
-                "&key=\(apiKey)" +
-                pageTokenParameter
+        let url = "https://fellyeah.duckdns.org:3491/nearby" +
+            "?latitude=\(lat)" +
+            "&longitude=\(lng)" +
+            "&key=\(apiKey)"
                 
-                if let results: GooglePlacesResult = await downloadData(fromURL: url) {
-                    for venue in results.results {
-                        if !addedVenues.contains(venue.id) {
-                            venues.append(venue)
-                            addedVenues.insert(venue.id)
-                        }
-                    }
-                    
-                    if let token = results.next_page_token {
-                        pageToken = token
-                        do {
-                            try await Task.sleep(for: .seconds(2), tolerance: .seconds(0.5))
-                        } catch {
-                            print("Error waiting: \(error)")
-                        }
-                    } else {
-                        pageToken = ""
-                        break
-                    }
+        if let results: RadiusAPIResult = await downloadData(fromURL: url) {
+            for venue in results.venues {
+                if !addedVenues.contains(venue.id) {
+                    venues.append(venue)
+                    addedVenues.insert(venue.id)
                 }
             }
         }
@@ -141,7 +99,7 @@ class WebService: Codable {
         } catch NetworkError.failedToDecodeResponse {
             print("Failed to decode response into the given type")
         } catch {
-            print("An error occured downloading the data")
+            print("An error occured downloading the data: \(error)")
         }
         
         return nil

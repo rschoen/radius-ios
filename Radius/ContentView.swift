@@ -44,7 +44,11 @@ struct ContentView: View {
                     Label("Map", systemImage: "map")
                 }.tag(0)
             
-            VenueListTabView(refreshCount: refreshCount)
+            VenueListTabView(refreshCount: refreshCount) {
+                Task {
+                    await updateVenues(forUser: user)
+                }
+            }
                 .tabItem {
                     Label("Venues", systemImage: "checklist")
                 }.tag(1)
@@ -52,7 +56,8 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }.tag(2)
-        }.fullScreenCover(isPresented: $showAddressPicker) {
+        }
+        .fullScreenCover(isPresented: $showAddressPicker) {
             VStack(alignment: .leading) {
                 Text("Welcome to Radius!")
                     .font(.title)
@@ -82,34 +87,24 @@ struct ContentView: View {
             }
             
             Task {
-                if networkVenues.isEmpty {
-                    if await updateVenues(forUser: user) {
-                        user.lastNetworkDataUpdate = Date()
-                    }
-                }
+                await updateVenues(forUser: user)
             }
             
             if user.address.isEmpty {
                 showAddressPicker = true
             }
         }
-        .onChange(of: showAddressPicker, initial: true) { _, _ in
+        .onChange(of: showAddressPicker, initial: false) { _, _ in
             Task {
                 if networkVenues.isEmpty {
-                    if await updateVenues(forUser: user) {
-                        user.lastNetworkDataUpdate = Date()
-                    }
+                    await updateVenues(forUser: user)
+                    
                 }
             }
         }
     }
     
     func updateVenues(forUser user: User) async -> Bool {
-        if !user.lastNetworkDataUpdate.timeIntervalSinceNow.isLess(than: -refreshSeconds) {
-            print("Network data not expired, no refresh needed")
-            return false
-        }
-        
         if user.address.isEmpty {
             print("Address is empty")
             return false
@@ -139,11 +134,11 @@ struct ContentView: View {
                         //print("updating a venue")
                     found = true
                     venue.name = networkVenue.name
-                    venue.imageUrl = photoUrlFromPhotosList(networkVenue.photos, apiKey: apiKey)
-                    venue.reviews = networkVenue.user_ratings_total ?? 0
+                    venue.imageUrl = insertApiKeyToImageUrl(networkVenue.imageUrl)
+                    venue.reviews = networkVenue.reviews ?? 0
                     venue.rating = networkVenue.rating ?? 0
-                    venue.lat = networkVenue.geometry.location.lat
-                    venue.lng = networkVenue.geometry.location.lng
+                    venue.lat = networkVenue.latitude
+                    venue.lng = networkVenue.longitude
                         
                     let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
                     venue.milesFromHome = homeCoords.distanceInMiles(fromLat: venue.lat, fromLong: venue.lng)
@@ -154,39 +149,29 @@ struct ContentView: View {
                 }
             }
             if !found {
-                if let userRatings = networkVenue.user_ratings_total, let rating = networkVenue.rating {
+                if let userRatings = networkVenue.reviews, let rating = networkVenue.rating {
                     if userRatings > 5 {
                         //print("inserting a venue")
-                        
-                        let location = networkVenue.geometry.location
                        
                         let newVenue = Venue(
                             name: networkVenue.name,
                             id: networkVenue.id,
                             rating: rating,
                             reviews: userRatings,
-                            lat: location.lat,
-                            lng: location.lng,
-                            imageUrl: photoUrlFromPhotosList(networkVenue.photos, apiKey: apiKey),
-                            milesFromHome: homeCoords.distanceInMiles(fromLat: location.lat, fromLong: location.lng))
+                            lat: networkVenue.latitude,
+                            lng: networkVenue.longitude,
+                            imageUrl: insertApiKeyToImageUrl(networkVenue.imageUrl),
+                            milesFromHome: homeCoords.distanceInMiles(fromLat: networkVenue.latitude, fromLong: networkVenue.longitude))
                         modelContext.insert(newVenue)
                         try? modelContext.save()
                         refreshCount += 1
                     }
                 }
             }
+            //await Task.yield()
             
         }
         return true
-    }
-    
-    func photoUrlFromPhotosList(_ photosList: Array<GooglePhoto>?, apiKey: String) -> URL? {
-        var photoUrl: URL? = nil
-        if let photoRef = photosList?[0].photo_reference {
-            photoUrl = URL(string: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=70&photo_reference=\(photoRef)&key=\(apiKey)")
-        }
-        
-        return photoUrl
     }
     
 }
@@ -204,4 +189,12 @@ extension CLLocation {
         let distanceInMeters = self.distance(from: coordinates)
         return distanceInMeters * 0.000621371
     }
+}
+
+func insertApiKeyToImageUrl(_ url: String?) -> URL? {
+    let apiKey = getSecret(withKey: "GOOGLE_PLACES_API_KEY")
+    if url == nil || url!.isEmpty {
+        return nil
+    }
+    return URL(string: url!.replacingOccurrences(of: "API_KEY", with: apiKey))
 }
