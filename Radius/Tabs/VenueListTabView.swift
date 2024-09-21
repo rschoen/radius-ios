@@ -33,17 +33,17 @@ struct VenueListTabView: View {
             if venues.isEmpty {
                 VenueLoadingIndicator()
             } else {
-                    filterCheckboxes
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            VenuesList(showVisited: user.showVisited, showUnvisited: user.showUnvisited, showHidden: user.showHidden)
-                                .id("refresh-\(refreshCount)")
-                        }
-                        
+                filterCheckboxes
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        VenuesList(showVisited: user.showVisited, showUnvisited: user.showUnvisited, showHidden: user.showHidden)
+                            .id("refresh-\(refreshCount)")
                     }
-                    .refreshable {
-                        callOnRefresh()
-                    }
+                    
+                }
+                .refreshable {
+                    callOnRefresh()
+                }
             }
             Spacer(minLength: 15)
         }
@@ -52,7 +52,7 @@ struct VenueListTabView: View {
     
     
     var filterCheckboxes: some View {
-
+        
         return HStack(alignment: .center) {
             @Bindable var user = user
             LabeledCheckbox(label: "Visited", isOn: $user.showVisited)
@@ -83,20 +83,20 @@ struct VenuesList: View {
     
     init(showVisited: Bool, showUnvisited: Bool, showHidden: Bool) {
         _venues = Query(filter: #Predicate<Venue> { $0.active && (!$0.visited || showVisited) && ($0.visited || showUnvisited) && (!$0.hidden || showHidden) },
-                      sort: [SortDescriptor(\Venue.milesFromHome)])
+                        sort: [SortDescriptor(\Venue.milesFromHome)])
         
     }
     var body: some View {
-            ForEach(venues, id: \.id) { venue in
-                @Bindable var venue = venue
-                VenueListItem(venue)
-                    .onAppear {
-                        if (venues.last?.id == venue.id) {
-                            print("Asking for more venues")
-                        }
+        ForEach(venues, id: \.id) { venue in
+            @Bindable var venue = venue
+            VenueListItem(venue)
+                .onAppear {
+                    if (venues.last?.id == venue.id) {
+                        print("Asking for more venues")
                     }
-                    .transition(.move(edge: .top))
-            }
+                }
+                .transition(.move(edge: .top))
+        }
         //.animation(Animation.easeInOut(duration: 0.2))
     }
     
@@ -132,15 +132,15 @@ struct VenuesList: View {
             }
         }.padding(10)
             .background(venue.hidden ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
-            
-    }
         
-        func updateVenueInDatabase(_ venue: Venue) {
-            Task {
-                await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
-            }
-            try? modelContext.save()
+    }
+    
+    func updateVenueInDatabase(_ venue: Venue) {
+        Task {
+            await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
         }
+        try? modelContext.save()
+    }
     
     @ViewBuilder
     func StarsImage(withRating rating: Double) -> some View {
@@ -187,10 +187,12 @@ struct VenuesList: View {
         ZStack {
             Rectangle()
                 .stroke(.gray)
-            AsyncImage(url: url) { result in
-                result.image?
+            AsyncCachedImage(url: url) { image in
+                image
                     .resizable()
                     .scaledToFill()
+            } placeholder: {
+                ProgressView()
             }
         }
         .frame(width: 70, height:70)
