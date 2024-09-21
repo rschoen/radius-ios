@@ -142,38 +142,35 @@ struct VenuesList: View {
             try? modelContext.save()
         }
     
+    @ViewBuilder
     func StarsImage(withRating rating: Double) -> some View {
         let intRating = round(convertGoogleMapsRatingToRadiusRating(rating) * 2)
-        let image = switch(intRating) {
-        case 0:
-            "stars_regular_0"
-        case 1:
-            "stars_regular_0_half"
-        case 2:
-            "stars_regular_1"
-        case 3:
-            "stars_regular_1_half"
-        case 4:
-            "stars_regular_2"
-        case 5:
-            "stars_regular_2_half"
-        case 6:
-            "stars_regular_3"
-        case 7:
-            "stars_regular_3_half"
-        case 8:
-            "stars_regular_4"
-        case 9:
-            "stars_regular_4_half"
-        case 10:
-            "stars_regular_5"
-        default:
-            "stars_regular_0"
+        let stars = ratingToStarList(Int(intRating))
+        HStack(spacing: 1) {
+            ForEach(stars.indices, id: \.self) { index in
+                Image(stars[index])
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                
+            }
         }
-        
-        return Image(image)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
+    }
+    
+    func ratingToStarList(_ rating: Int) -> [String] {
+        var stars: [String] = []
+        var ratingLeft = rating
+        for _ in 1...5 {
+            if ratingLeft >= 2 {
+                stars += ["star_full"]
+                ratingLeft -= 2
+            } else if ratingLeft == 1 {
+                stars += ["star_half"]
+                ratingLeft -= 1
+            } else {
+                stars += ["star_empty"]
+            }
+        }
+        return stars
     }
     
     func StarsAndReviews(rating: Double, reviews: Int) -> some View {
