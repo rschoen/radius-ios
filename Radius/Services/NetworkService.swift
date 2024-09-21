@@ -26,8 +26,9 @@ struct NetworkVenue: Identifiable, Codable {
     let rating: Double?
     let latitude: Double
     let longitude: Double
+    let timeLastUpdated: Int
     private enum CodingKeys: String, CodingKey {
-        case id, name, imageUrl, reviews, rating, latitude, longitude
+        case id, name, imageUrl, reviews, rating, latitude, longitude, timeLastUpdated
     }
 }
 
@@ -45,7 +46,7 @@ class WebService: Codable {
     static let resultsPerQuery = 20
     static let queries = 3
     
-    func getVenuesAroundLatLng(_ lat: Double, _ lng: Double) async -> [NetworkVenue] {
+    func getVenuesAroundLatLng(_ lat: Double, _ lng: Double, timeOfLastUpdate: Int = 0) async -> [NetworkVenue] {
         
         let apiKey = getSecret(withKey: "RADIUS_API_KEY")
         var venues: [NetworkVenue] = []
@@ -54,6 +55,7 @@ class WebService: Codable {
         let url = "https://fellyeah.duckdns.org:3491/nearby" +
             "?latitude=\(lat)" +
             "&longitude=\(lng)" +
+            "&updated_since=\(timeOfLastUpdate)" +
             "&key=\(apiKey)"
                 
         if let results: RadiusAPIResult = await downloadData(fromURL: url) {

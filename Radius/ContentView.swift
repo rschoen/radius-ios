@@ -112,8 +112,8 @@ struct ContentView: View {
         
         let homeCoords = CLLocation(latitude: user.lat, longitude: user.lng)
         
-        let networkVenues = await WebService().getVenuesAroundLatLng(user.lat, user.lng)
-        venues.forEach {
+        let networkVenues = await WebService().getVenuesAroundLatLng(user.lat, user.lng, timeOfLastUpdate: user.lastVenueUpdated)
+        /*venues.forEach {
             $0.active = false
             $0.name = ""
             $0.reviews = 0
@@ -122,11 +122,16 @@ struct ContentView: View {
             $0.lng = 0
             $0.milesFromHome = 0
             $0.imageUrl = nil
-        }
+        }*/
         
         let apiKey = getSecret(withKey: "GOOGLE_PLACES_API_KEY")
         
         for networkVenue in networkVenues {
+            
+            if networkVenue.timeLastUpdated > user.lastVenueUpdated {
+                user.lastVenueUpdated = networkVenue.timeLastUpdated
+            }
+            
             var found = false
             for venue in venues {
                 if venue.id == networkVenue.id  {
@@ -161,7 +166,9 @@ struct ContentView: View {
                             lat: networkVenue.latitude,
                             lng: networkVenue.longitude,
                             imageUrl: insertApiKeyToImageUrl(networkVenue.imageUrl),
-                            milesFromHome: homeCoords.distanceInMiles(fromLat: networkVenue.latitude, fromLong: networkVenue.longitude))
+                            milesFromHome: homeCoords.distanceInMiles(fromLat: networkVenue.latitude, fromLong: networkVenue.longitude),
+                            timeLastUpdated: networkVenue.timeLastUpdated
+                        )
                         modelContext.insert(newVenue)
                         try? modelContext.save()
                         refreshCount += 1
