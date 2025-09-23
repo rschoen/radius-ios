@@ -137,7 +137,7 @@ struct VenuesList: View {
     
     func updateVenueInDatabase(_ venue: Venue) {
         Task {
-            await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
+            try await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
         }
         try? modelContext.save()
     }

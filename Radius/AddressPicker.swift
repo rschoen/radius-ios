@@ -75,7 +75,11 @@ struct AddressPicker: View {
         user.lng = longitude
         try? modelContext.save()
         isPresented = false
-        await firestore.storeAddress(address: address, latitude: latitude, longitude: longitude)
+        do {
+            try await firestore.storeAddress(address: address, latitude: latitude, longitude: longitude)
+        } catch {
+            print("Erro saving address")
+        }
     }
 }
 

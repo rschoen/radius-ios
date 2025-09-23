@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import Firebase
 import FirebaseFirestore
+import FirebaseDatabase
 
 struct DatabaseVenue: Codable {
     let venueId: String?
@@ -46,12 +47,38 @@ extension FirebaseFirestore {
         }
         return ref!
     }
-    
-    
-    func fetchVenuesSnapshot() async -> DataSnapshot {
-        await withCheckedContinuation { continuation in
-            getReference().child("users").child(userId).child("venues").observeSingleEvent(of: DataEventType.value) { snapshot in
+
+    func fetchVenuesSnapshot() async throws -> DataSnapshot {
+        try await withCheckedThrowingContinuation { continuation in
+            let ref = getReference().child("users").child(userId).child("venues")
+            ref.observeSingleEvent(of: DataEventType.value) { snapshot in
                 continuation.resume(returning: snapshot)
+            } withCancel: { error in
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+    
+    private func setValueAsync(_ ref: DatabaseReference, value: Any?) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            ref.setValue(value) { error, _ in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    private func removeValueAsync(_ ref: DatabaseReference) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            ref.removeValue { error, _ in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
             }
         }
     }
@@ -62,7 +89,8 @@ extension FirebaseFirestore {
         
         print("FULL SYNC TRIGGERED")
         
-        let snapshot = await fetchVenuesSnapshot()
+        let snapshot = try? await fetchVenuesSnapshot()
+        guard let snapshot else { return }
         var databaseVenues = Dictionary<String, DatabaseVenue>()
         for venue in snapshot.children {
             guard let snap = venue as? DataSnapshot else { return }
@@ -70,9 +98,8 @@ extension FirebaseFirestore {
             do {
                 let jsonData = try JSONSerialization.data(withJSONObject: value, options: [])
                 let decoded = try JSONDecoder().decode(DatabaseVenue.self, from: jsonData)
-                if let venueId = decoded.venueId {
-                    databaseVenues[venueId] = decoded
-                }
+                let resolvedId = decoded.venueId ?? snap.key
+                databaseVenues[resolvedId] = decoded
             } catch {
                 print("ERROR HERE: \(error)")
             }
@@ -84,12 +111,11 @@ extension FirebaseFirestore {
                 if let databaseVenue = databaseVenues[venue.id] {
                     if let lastUpdated = databaseVenue.lastUpdated {
                         if lastUpdated > venue.lastUpdated {
-                            print("Updating local data for \(venue.name)")
                             venue.visited = databaseVenue.visited ?? venue.visited
                             venue.hidden = databaseVenue.hidden ?? venue.hidden
                             venue.lastUpdated = lastUpdated
                         } else if  lastUpdated < venue.lastUpdated {
-                            updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
+                            try? await updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
                         }
                     }
                     await Task.yield()
@@ -103,33 +129,28 @@ extension FirebaseFirestore {
         
     }
                     
-    func updateFirebaseVenue(id: String, visited: Bool, hidden: Bool, lastUpdated: Int?) {
+    func updateFirebaseVenue(id: String, visited: Bool, hidden: Bool, lastUpdated: Int?) async throws {
         if userId.isEmpty { return }
-        print("Updating remote data for venue \(id)")
         let venueNode = getReference().child("users/\(userId)/venues/\(id)")
-        
-        venueNode.child("visited").setValue(visited)
-        venueNode.child("hidden").setValue(hidden)
+        try await setValueAsync(venueNode.child("venueId"), value: id)
+        try await setValueAsync(venueNode.child("visited"), value: visited)
+        try await setValueAsync(venueNode.child("hidden"), value: hidden)
         if let lastUpdated {
-            venueNode.child("lastUpdated").setValue(lastUpdated)
+            try await setValueAsync(venueNode.child("lastUpdated"), value: lastUpdated)
         }
     }
     
-    func storeAddress(address: String, latitude: Double, longitude: Double) {
-        if userId.isEmpty { return } 
-        
+    func storeAddress(address: String, latitude: Double, longitude: Double) async throws {
+        if userId.isEmpty { return }
         let addressNode = getReference().child("users/\(userId)/address")
-        
-        addressNode.setValue("address")
-        addressNode.child("address").setValue(address)
-        addressNode.child("latitude").setValue(latitude)
-        addressNode.child("longitude").setValue(longitude)
+        try await setValueAsync(addressNode.child("address"), value: address)
+        try await setValueAsync(addressNode.child("latitude"), value: latitude)
+        try await setValueAsync(addressNode.child("longitude"), value: longitude)
     }
     
-    func deleteUser() -> Bool {
+    func deleteUser() async throws -> Bool {
         if userId.isEmpty { return false }
-        
-        getReference().child("users/\(userId)").removeValue()
+        try await removeValueAsync(getReference().child("users/\(userId)"))
         return true
     }
     

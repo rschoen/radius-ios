@@ -236,7 +236,7 @@ struct SettingsTabView: View {
     
     func deleteUser() async -> Bool {
         do {
-            if await firestore.deleteUser() == false {
+            if try await firestore.deleteUser() == false {
                 return false
             }
             let user = Auth.auth().currentUser
