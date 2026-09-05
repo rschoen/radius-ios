@@ -406,7 +406,7 @@
 				CODE_SIGN_ENTITLEMENTS = Radius/Radius.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"Radius/Preview Content\"";
 				DEVELOPMENT_TEAM = X5QW7R8SD5;
 				ENABLE_PREVIEWS = YES;
@@ -423,7 +423,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ryanschoen.Radius;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -443,7 +443,7 @@
 				CODE_SIGN_ENTITLEMENTS = Radius/Radius.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"Radius/Preview Content\"";
 				DEVELOPMENT_TEAM = X5QW7R8SD5;
 				ENABLE_PREVIEWS = YES;
@@ -460,7 +460,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ryanschoen.Radius;
 				PRODUCT_NAME = "$(TARGET_NAME)";
