@@ -8,16 +8,19 @@
 import Foundation
 import UIKit
 import SwiftUI
-import GooglePlaces
+@preconcurrency import GooglePlaces
 
+@MainActor
 class AutocompleteViewController: UIViewController {
     @Binding var isPresented: Bool
     var completionHandler: (_ address: String, _ latitude: Double, _ longitude: Double) async -> ()
+    private let delegateProxy = AutocompleteDelegate()
     
     init(isPresented: Binding<Bool>, completionHandler: @escaping (_ address: String, _ latitude: Double, _ longitude: Double) async -> ()) {
         self._isPresented = isPresented
         self.completionHandler = completionHandler
         super.init(nibName: nil, bundle: nil)
+        self.delegateProxy.owner = self
     }
     
     required init?(coder: NSCoder) {
@@ -25,6 +28,7 @@ class AutocompleteViewController: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         showAutocomplete()
     }
     
@@ -32,11 +36,10 @@ class AutocompleteViewController: UIViewController {
   // Present the Autocomplete view controller when the button is pressed.
   @objc func showAutocomplete() {
     let autocompleteController = GMSAutocompleteViewController()
-    autocompleteController.delegate = self
+    autocompleteController.delegate = delegateProxy
 
     // Specify the place data types to return.
-    let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(GMSPlaceField.name.rawValue) |
-      UInt64(GMSPlaceField.placeID.rawValue))
+    let fields: GMSPlaceField = [.name, .placeID, .formattedAddress, .coordinate]
     autocompleteController.placeFields = fields
 
     // Specify a filter.
@@ -50,38 +53,46 @@ class AutocompleteViewController: UIViewController {
 
 }
 
-extension AutocompleteViewController: GMSAutocompleteViewControllerDelegate {
+final class AutocompleteDelegate: NSObject, GMSAutocompleteViewControllerDelegate {
+    weak var owner: AutocompleteViewController?
 
-  // Handle the user's selection.
-  func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
-      Task {
-          await completionHandler(place.formattedAddress ?? "", place.coordinate.latitude, place.coordinate.longitude)
-      }
-      dismiss(animated: true) {
-          self.isPresented = false
-      }
-  }
+    func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
+        let owner = self.owner
+        let address = place.formattedAddress ?? ""
+        let lat = place.coordinate.latitude
+        let lng = place.coordinate.longitude
+        Task { @MainActor in
+            guard let owner else { return }
+            await owner.completionHandler(address, lat, lng)
+            owner.dismiss(animated: true) {
+                owner.isPresented = false
+            }
+        }
+    }
 
-  func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
-    // TODO: handle the error.
-      print("Error: ", error.localizedDescription, error.self)
-      dismiss(animated: true) {
-          self.isPresented = false
-      }
-  }
+    func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
+        let owner = self.owner
+        Task { @MainActor in
+            guard let owner else { return }
+            print("Error: ", error.localizedDescription, error)
+            owner.dismiss(animated: true) {
+                owner.isPresented = false
+            }
+        }
+    }
 
-  // User canceled the operation.
-  func wasCancelled(_ viewController: GMSAutocompleteViewController) {
-      
-      dismiss(animated: true) {
-          self.isPresented = false
-      }
-      
-  }
-
+    func wasCancelled(_ viewController: GMSAutocompleteViewController) {
+        let owner = self.owner
+        Task { @MainActor in
+            guard let owner else { return }
+            owner.dismiss(animated: true) {
+                owner.isPresented = false
+            }
+        }
+    }
 }
 
-
+@MainActor
 struct MyPlacePicker: UIViewControllerRepresentable {
     @Binding var isPresented: Bool
     var completionHandler: (_ address: String, _ latitude: Double, _ longitude: Double) async -> ()
@@ -94,3 +105,4 @@ struct MyPlacePicker: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: AutocompleteViewController, context: Context) {
     }
 }
+

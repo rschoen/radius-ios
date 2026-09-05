@@ -1,12 +1,24 @@
 import Foundation
 import Firebase
 import GoogleSignIn
+import UIKit
+
+enum SignInError: LocalizedError {
+    case message(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .message(let text):
+            return text
+        }
+    }
+}
 
 @MainActor struct Authentication {
     func googleOauth() async throws {
         // google sign in
         guard let clientID = FirebaseApp.app()?.options.clientID else {
-            fatalError("no firbase clientID found")
+            throw SignInError.message("No Firebase clientID found")
         }
 
         // Create Google Sign In configuration object.
@@ -16,7 +28,7 @@ import GoogleSignIn
         //get rootView
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = scene.keyWindow?.rootViewController ?? scene.windows.first?.rootViewController else {
-            fatalError("There is no root view controller!")
+            throw SignInError.message("There is no root view controller")
         }
         
         //google sign in authentication response
@@ -25,7 +37,7 @@ import GoogleSignIn
         )
         let user = result.user
         guard let idToken = user.idToken?.tokenString else {
-            throw "Unexpected error occurred, please retry"
+            throw SignInError.message("Unexpected error occurred, please retry")
         }
         
         //Firebase auth
@@ -40,6 +52,3 @@ import GoogleSignIn
         try Auth.auth().signOut()
     }
 }
-
-
-extension String: Error {}

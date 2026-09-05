@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 
+@MainActor
 struct VenueListTabView: View {
     @Environment(\.modelContext) private var modelContext
     
@@ -36,7 +37,7 @@ struct VenueListTabView: View {
                 filterCheckboxes
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
-                        VenuesList(showVisited: user.showVisited, showUnvisited: user.showUnvisited, showHidden: user.showHidden)
+                        VenuesList(venues: venues, showVisited: user.showVisited, showUnvisited: user.showUnvisited, showHidden: user.showHidden)
                             .id("refresh-\(refreshCount)")
                     }
                     
@@ -75,23 +76,29 @@ struct VenueListTabView: View {
     
 }
 
+@MainActor
 struct VenuesList: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
     @EnvironmentObject var firestore: FirebaseFirestore
-    @Query var venues: [Venue]
-    
-    init(showVisited: Bool, showUnvisited: Bool, showHidden: Bool) {
-        _venues = Query(filter: #Predicate<Venue> { $0.active && (!$0.visited || showVisited) && ($0.visited || showUnvisited) && (!$0.hidden || showHidden) },
-                        sort: [SortDescriptor(\Venue.milesFromHome)])
-        
+
+    let venues: [Venue]
+    let showVisited: Bool
+    let showUnvisited: Bool
+    let showHidden: Bool
+
+    private var filteredVenues: [Venue] {
+        venues
+            .filter { $0.active && (!$0.visited || showVisited) && ($0.visited || showUnvisited) && (!$0.hidden || showHidden) }
+            .sorted { $0.milesFromHome < $1.milesFromHome }
     }
+    
     var body: some View {
-        ForEach(venues, id: \.id) { venue in
+        ForEach(filteredVenues, id: \.id) { venue in
             @Bindable var venue = venue
             VenueListItem(venue)
                 .onAppear {
-                    if (venues.last?.id == venue.id) {
+                    if (filteredVenues.last?.id == venue.id) {
                         print("Asking for more venues")
                     }
                 }
@@ -100,7 +107,7 @@ struct VenuesList: View {
         //.animation(Animation.easeInOut(duration: 0.2))
     }
     
-    func VenueListItem(_ venue: Venue) -> some View {
+    @MainActor func VenueListItem(_ venue: Venue) -> some View {
         return ZStack(alignment: .leading) {
             venueBoundingBox
             HStack {
@@ -135,13 +142,18 @@ struct VenuesList: View {
         
     }
     
-    func updateVenueInDatabase(_ venue: Venue) {
+    @MainActor func updateVenueInDatabase(_ venue: Venue) {
+        let id = venue.id
+        let visited = venue.visited
+        let hidden = venue.hidden
+        let lastUpdated = venue.lastUpdated
         Task {
-            try await firestore.updateFirebaseVenue(id: venue.id, visited: venue.visited, hidden: venue.hidden, lastUpdated: venue.lastUpdated)
+            try await firestore.updateFirebaseVenue(id: id, visited: visited, hidden: hidden, lastUpdated: lastUpdated)
         }
         try? modelContext.save()
     }
     
+    @MainActor
     @ViewBuilder
     func StarsImage(withRating rating: Double) -> some View {
         let intRating = round(convertGoogleMapsRatingToRadiusRating(rating) * 2)
@@ -156,7 +168,7 @@ struct VenuesList: View {
         }
     }
     
-    func ratingToStarList(_ rating: Int) -> [String] {
+    @MainActor func ratingToStarList(_ rating: Int) -> [String] {
         var stars: [String] = []
         var ratingLeft = rating
         for _ in 1...5 {
@@ -173,7 +185,7 @@ struct VenuesList: View {
         return stars
     }
     
-    func StarsAndReviews(rating: Double, reviews: Int) -> some View {
+    @MainActor func StarsAndReviews(rating: Double, reviews: Int) -> some View {
         HStack {
             StarsImage(withRating: rating)
                 .frame(maxHeight: 18)
@@ -183,7 +195,7 @@ struct VenuesList: View {
         }
     }
     
-    func VenueImage(withUrl url: URL?) -> some View {
+    @MainActor func VenueImage(withUrl url: URL?) -> some View {
         ZStack {
             Rectangle()
                 .stroke(.gray)
@@ -199,7 +211,7 @@ struct VenuesList: View {
         .clipped()
     }
     
-    func VenueDetails(@Bindable _ venue: Venue) -> some View {
+    @MainActor func VenueDetails(@Bindable _ venue: Venue) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(venue.name)
                 .fontWeight(.medium)
@@ -210,7 +222,7 @@ struct VenuesList: View {
         }
     }
     
-    var venueBoundingBox: some View {
+    @MainActor var venueBoundingBox: some View {
         Rectangle()
             .fill(Color.clear)
             .frame(minHeight: 60)
@@ -226,3 +238,4 @@ struct VenuesList: View {
 #Preview {
     return VenueListTabView(refreshCount: 0) {}
 }
+

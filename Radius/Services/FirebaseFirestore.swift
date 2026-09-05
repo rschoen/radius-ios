@@ -11,7 +11,7 @@ import Firebase
 import FirebaseFirestore
 import FirebaseDatabase
 
-struct DatabaseVenue: Codable {
+struct DatabaseVenue: Codable, Sendable {
     let venueId: String?
     let visited: Bool?
     let hidden: Bool?
@@ -48,11 +48,24 @@ extension FirebaseFirestore {
         return ref!
     }
 
-    func fetchVenuesSnapshot() async throws -> DataSnapshot {
+    private func fetchDatabaseVenues() async throws -> [String: DatabaseVenue] {
         try await withCheckedThrowingContinuation { continuation in
             let ref = getReference().child("users").child(userId).child("venues")
             ref.observeSingleEvent(of: DataEventType.value) { snapshot in
-                continuation.resume(returning: snapshot)
+                var result: [String: DatabaseVenue] = [:]
+                for child in snapshot.children {
+                    guard let snap = child as? DataSnapshot else { continue }
+                    guard let value = snap.value as? [String: Any] else { continue }
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: value, options: [])
+                        let decoded = try JSONDecoder().decode(DatabaseVenue.self, from: jsonData)
+                        let resolvedId = decoded.venueId ?? snap.key
+                        result[resolvedId] = decoded
+                    } catch {
+                        print("ERROR HERE: \(error)")
+                    }
+                }
+                continuation.resume(returning: result)
             } withCancel: { error in
                 continuation.resume(throwing: error)
             }
@@ -82,28 +95,14 @@ extension FirebaseFirestore {
             }
         }
     }
-    
+
     func fullSync(userId: String) async {
         if userId.isEmpty { return }
         self.userId = userId
         
         print("FULL SYNC TRIGGERED")
         
-        let snapshot = try? await fetchVenuesSnapshot()
-        guard let snapshot else { return }
-        var databaseVenues = Dictionary<String, DatabaseVenue>()
-        for venue in snapshot.children {
-            guard let snap = venue as? DataSnapshot else { return }
-            guard let value = snap.value as? [String: Any] else { return }
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: value, options: [])
-                let decoded = try JSONDecoder().decode(DatabaseVenue.self, from: jsonData)
-                let resolvedId = decoded.venueId ?? snap.key
-                databaseVenues[resolvedId] = decoded
-            } catch {
-                print("ERROR HERE: \(error)")
-            }
-        }
+        guard let databaseVenues = try? await fetchDatabaseVenues() else { return }
         
         do {
             let venues = try modelContext.fetch(FetchDescriptor<Venue>())
@@ -216,3 +215,4 @@ extension FirebaseFirestore {
         }
     }*/
 }
+

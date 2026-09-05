@@ -24,7 +24,7 @@ class Venue: Identifiable, CustomStringConvertible {
     }
     
     var name: String
-    let id: String
+    @Attribute(.unique) var id: String
     var rating: Double
     var reviews: Int
     var lat: Double
@@ -40,7 +40,7 @@ class Venue: Identifiable, CustomStringConvertible {
     var lastUpdated: Int = 0
     
     var description: String {
-        return "Venue (id: \(id), name: \(name), rating: \(rating), reviews: \(reviews), imageUrl: \(imageUrl?.absoluteString ?? "nil")"
+        return "Venue (id: \(id), name: \(name), rating: \(rating), reviews: \(reviews), imageUrl: \(imageUrl?.absoluteString ?? "nil"))"
     }
     
     func setLastUpdated() {
@@ -48,3 +48,4 @@ class Venue: Identifiable, CustomStringConvertible {
         print("Time last updated now \(lastUpdated)")
     }
 }
+
