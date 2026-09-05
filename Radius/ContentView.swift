@@ -124,8 +124,6 @@ struct ContentView: View {
             $0.imageUrl = nil
         }*/
         
-        let apiKey = getSecret(withKey: "GOOGLE_PLACES_API_KEY")
-        
         for networkVenue in networkVenues {
             
             if networkVenue.timeLastUpdated > user.lastVenueUpdated {
@@ -145,7 +143,6 @@ struct ContentView: View {
                     venue.lat = networkVenue.latitude
                     venue.lng = networkVenue.longitude
                         
-                    let coordinates = CLLocation(latitude: venue.lat, longitude: venue.lng)
                     venue.milesFromHome = homeCoords.distanceInMiles(fromLat: venue.lat, fromLong: venue.lng)
                     
                     venue.active = true

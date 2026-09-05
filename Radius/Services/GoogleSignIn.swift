@@ -2,7 +2,7 @@ import Foundation
 import Firebase
 import GoogleSignIn
 
-struct Authentication {
+@MainActor struct Authentication {
     func googleOauth() async throws {
         // google sign in
         guard let clientID = FirebaseApp.app()?.options.clientID else {
@@ -14,9 +14,8 @@ struct Authentication {
         GIDSignIn.sharedInstance.configuration = config
         
         //get rootView
-        let scene = await UIApplication.shared.connectedScenes.first as? UIWindowScene
-        guard let rootViewController = await scene?.windows.first?.rootViewController
-        else {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = scene.keyWindow?.rootViewController ?? scene.windows.first?.rootViewController else {
             fatalError("There is no root view controller!")
         }
         
