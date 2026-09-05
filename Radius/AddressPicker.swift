@@ -78,7 +78,7 @@ struct AddressPicker: View {
         do {
             try await firestore.storeAddress(address: address, latitude: latitude, longitude: longitude)
         } catch {
-            print("Erro saving address")
+            print("Error saving address")
         }
     }
 }

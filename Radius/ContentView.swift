@@ -8,14 +8,11 @@
 import SwiftUI
 import SwiftData
 import FirebaseAuth
-import GoogleMaps
-
-let refreshSeconds: Double = 60 * 60 * 24
+import CoreLocation
 
 @MainActor
 struct ContentView: View {
     @State private var userLoggedIn = (Auth.auth().currentUser != nil)
-    @State private var networkVenues = [NetworkVenue]()
     
     
     @Environment(\.modelContext) private var modelContext
@@ -37,6 +34,8 @@ struct ContentView: View {
     @State var showAddressPicker = false
 
     @State var tabViewSelection: Int = 1
+    @State private var authStateHandle: AuthStateDidChangeListenerHandle?
+
     var body: some View {
         TabView(selection: $tabViewSelection) {
             GoogleMapsTabView()
@@ -68,7 +67,7 @@ struct ContentView: View {
         }
         .onAppear{
             //Firebase state change listeneer
-            Auth.auth().addStateDidChangeListener{ auth, newUser in
+            authStateHandle = Auth.auth().addStateDidChangeListener { _, newUser in
                 if let newUser {
                     userLoggedIn = true
                     user.email = newUser.email ?? ""
@@ -96,10 +95,13 @@ struct ContentView: View {
         }
         .onChange(of: showAddressPicker, initial: false) { _, _ in
             Task {
-                if networkVenues.isEmpty {
-                    await updateVenues(forUser: user)
-                    
-                }
+                _ = await updateVenues(forUser: user)
+            }
+        }
+        .onDisappear {
+            if let handle = authStateHandle {
+                Auth.auth().removeStateDidChangeListener(handle)
+                authStateHandle = nil
             }
         }
     }
@@ -196,9 +198,7 @@ extension CLLocation {
 }
 
 func insertApiKeyToImageUrl(_ url: String?) -> URL? {
+    guard let url, !url.isEmpty else { return nil }
     let apiKey = getSecret(withKey: "GOOGLE_PLACES_API_KEY")
-    if url == nil || url!.isEmpty {
-        return nil
-    }
-    return URL(string: url!.replacingOccurrences(of: "API_KEY", with: apiKey))
+    return URL(string: url.replacingOccurrences(of: "API_KEY", with: apiKey))
 }
